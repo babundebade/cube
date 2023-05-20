@@ -51,25 +51,21 @@ provider "helm" {
   }
 }
 
-resource "kubernetes_config_map_v1" "metallb-configmap" {
-  metadata {
-    name = "metallb-configmap"
-    namespace = "metallb-system"
-  }
-  data = {
-    config = file("metallb/configmap.yaml")
-  }  
+resource "kubernetes_manifest" "metallb-configmap" {
+  manifest = file("modules/metallb/configmap.yaml")  
 }
 
 resource "helm_release" "metallb" {
   name       = "metallb"
   namespace  = "metallb-system"
-  create_namespace = true
   repository = "https://charts.bitnami.com/bitnami"
-  chart      = "bitnami/metallb"
-  #version    = "4.4.2"
-  values = [file("metallb/metallb_values.yaml")]
+  chart      = "metallb"
+
+  values = [file("modules/metallb/metallb_values.yaml")]
+
+  depends_on = [kubernetes_manifest.metallb-configmap]
 }
+
 
 /* resource "kubernetes_service" "ingress-service" {
   metadata {
