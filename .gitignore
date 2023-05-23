@@ -1,5 +1,5 @@
-./terraform.tfstate
-./terraform.tfstate.backup
-./terraform.lock.hcl
+terraform.tfstate
+terraform.tfstate.backup
+terraform.lock.hcl
 ./terraform/
-./kubeconfig_cube
+kubeconfig_cube
