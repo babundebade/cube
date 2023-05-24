@@ -1,6 +1,6 @@
 # Raspberry Pi Kubernetes Cluster with Talos
 
-This project aims to set up a Kubernetes cluster using three Raspberry Pis running Talos as the operating system. The cluster is provisioned and managed using Terraform and Helm, providing a learning opportunity for beginners like me in the field who want to gain hands-on experience with industry-standard practices.
+Work in progress...
 
 ## Project Overview
 
