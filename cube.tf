@@ -1,5 +1,5 @@
 provider "talos" {
-  # Configuration options
+    # Configuration options
 }
 
 resource "talos_machine_secrets" "controller" {}

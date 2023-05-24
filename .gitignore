@@ -1,4 +1,4 @@
 *tfstate*
-*.tfvars
+*tfvars
 .terraform
 kubeconfig_cube
