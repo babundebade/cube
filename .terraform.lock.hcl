@@ -60,6 +60,28 @@ provider "registry.terraform.io/hashicorp/null" {
   ]
 }
 
+provider "registry.terraform.io/kube-cloud/mikrotik" {
+  version     = "0.12.0"
+  constraints = "0.12.0"
+  hashes = [
+    "h1:a8/+C6IiuF7X9c7DP2jZ2vnuhxxpSTNi2fh5exOVwU4=",
+    "zh:1031017f6f299a997fcc88040253361ad6d7942e788ae3838fcee04f73d048b2",
+    "zh:352711b3a3343f2fc36990912ed0e37b324593da6eb6978ac172c02489bdcdac",
+    "zh:568e51ab1765cb5e302c5e60b8cb51be54f0634ba61b257c2ee6ec012d021339",
+    "zh:5e139a1ec22786cce7e9c27ea19de3c055ff6011afda5c8c13a0b49e69a6ce9c",
+    "zh:763ef7c26f6a0853e807c92c9beeaf1e5af858af6e99c3249e837cab8a985ec5",
+    "zh:85e7ca05e22d5df19377e8a9e2c0229ceccc4f5c77e46714300313c11d09549b",
+    "zh:9eb6b5161addd8b179cc62b498535ff51714f573367b7f1876c5a890fafdc316",
+    "zh:a7bae893fb1a3a4cd3d6ae3dc12e0960153cae9bd55d5140208356ebb2b8823c",
+    "zh:b253410b328c8ef89b90d58a7073553c9c75eb79e7474e012985026e3b63d5ba",
+    "zh:b2c9d70f64e5b8f4e8e647814424d8c45bf3b9c9b070b32ebe604bc147d83e24",
+    "zh:c5b42aaef9e830e9361f83ef5c3c5387574f277238053dc1fd26dabcbf32bec8",
+    "zh:ca58e3c56ab6b1ca79c99c8786e78cb237ecbd98492fa07eba39ba94e90ec80c",
+    "zh:e7fe96ad204032f92ed9cfc626c7fb6ed743186ac5022454046d137ce7c1e30e",
+    "zh:ed587af2fe2c2905ed6515e8d2d6963c94178547981d4cbe47d794cc04da76ad",
+  ]
+}
+
 provider "registry.terraform.io/siderolabs/talos" {
   version     = "0.2.0"
   constraints = "0.2.0"
