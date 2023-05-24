@@ -21,12 +21,12 @@ resource "helm_release" "metallb" {
   repository = "https://charts.bitnami.com/bitnami"
   chart      = "metallb"
 
-  values = [file("modules/metallb/values.yaml")]
+  values = [file("services/metallb/values.yaml")]
 }
 
 resource "null_resource" "metallb-resources" {
   provisioner "local-exec" {
-    command = "kubectl apply -f modules/metallb/configmap.yaml"
+    command = "kubectl apply -f services/metallb/configmap.yaml"
   }
   depends_on = [helm_release.metallb]
 }

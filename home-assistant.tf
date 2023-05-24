@@ -21,12 +21,12 @@ resource "helm_release" "home-assistant" {
   repository = "https://geek-cookbook.github.io/charts/"
   chart      = "home-assistant"
 
-  values = [file("modules/home-assistant/values.yaml")]
+  values = [file("services/home-assistant/values.yaml")]
 }
 
 resource "null_resource" "home-assistant-resources" {
   provisioner "local-exec" {
-    command = "kubectl apply -f modules/home-assistant/ha-ingress.yaml"
+    command = "kubectl apply -f services/home-assistant/ha-ingress.yaml"
   }
   depends_on = [helm_release.home-assistant]
 }

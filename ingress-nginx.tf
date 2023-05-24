@@ -14,7 +14,7 @@ resource "helm_release" "ingress-nginx" {
   repository = "https://kubernetes.github.io/ingress-nginx"
   chart      = "ingress-nginx"
 
-  values = [file("modules/ingress-nginx/ingress-nginx_values.yaml")]
+  values = [file("services/ingress-nginx/ingress-nginx_values.yaml")]
 
   depends_on = [kubernetes_manifest.ingress-nginx]
 }

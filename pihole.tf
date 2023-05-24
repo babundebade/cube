@@ -21,7 +21,7 @@ resource "helm_release" "pihole" {
   repository = "https://mojo2600.github.io/pihole-kubernetes/"
   chart      = "pihole" #mojo2600/pihole
 
-  values = [file("modules/pihole/values-pihole.yaml")]
+  values = [file("services/pihole/values-pihole.yaml")]
 
   depends_on = [kubernetes_manifest.namespace_pihole]  
 }
