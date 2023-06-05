@@ -1,4 +1,5 @@
 *tfstate*
 *tfvars
 .terraform
+.talos/configs
 kubeconfig_cube

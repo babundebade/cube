@@ -23,5 +23,28 @@ resource "helm_release" "pihole" {
 
   values = [file("services/pihole/values-pihole.yaml")]
 
-  depends_on = [kubernetes_manifest.namespace_pihole]  
+  depends_on = [kubernetes_manifest.namespace_pihole]
 }
+
+# resource "kubernetes_ingress_v1" "pihole_ingress" {
+#   metadata {
+#     name = "pihole-web"
+#     namespace = "pihole"
+#   }
+
+#   spec {
+#     rule {
+#       host = "pihole.local"
+#       http {
+#         path {
+#           backend {
+#             serviceName = "pihole-web"
+#             servicePort = 80
+#           }
+#         }
+#       }
+#     }
+#   }
+
+#   depends_on = [helm_release.pihole]
+# }
