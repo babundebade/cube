@@ -24,9 +24,10 @@ resource "helm_release" "metallb" {
   values = [file("services/metallb/values.yaml")]
 }
 
-resource "null_resource" "metallb-resources" {
+resource "null_resource" "ipaddresspool_metallb_system_metallb_pool" {
   provisioner "local-exec" {
-    command = "kubectl apply -f services/metallb/configmap.yaml"
+    command = "kubectl apply -f services/metallb/configmap.yaml"    
   }
+
   depends_on = [helm_release.metallb]
 }

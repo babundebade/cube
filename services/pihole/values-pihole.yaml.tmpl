@@ -51,7 +51,7 @@ serviceDns:
   externalTrafficPolicy: Local
   
   # -- A fixed `spec.loadBalancerIP` for the DNS Service
-  loadBalancerIP: ""
+  loadBalancerIP: ${serviceDNS_loadBalancerIPv4}
   annotations: 
   metallb.universe.tf/address-pool: pihole-pool
   metallb.universe.tf/allow-shared-ip: pihole-pool
@@ -153,7 +153,7 @@ ingress:
   path: /admin
   hosts:
     # virtualHost (default value is pi.hole) will be appended to the hosts
-    - pihole.cool
+    - ${ingress_hosts}
   tls: []
   #  - secretName: chart-example-tls
   #    hosts:
@@ -352,11 +352,11 @@ adlists:
   - https://v.firebog.net/hosts/static/w3kbl.txt
   - https://raw.githubusercontent.com/matomo-org/referrer-spam-blacklist/master/spammers.txt
   - https://someonewhocares.org/hosts/zero/hosts
-  - https://raw.githubusercontent.com/VeleSila/yhosts/master/hosts
-  - https://winhelp2002.mvps.org/hosts.txt
+  #- https://raw.githubusercontent.com/VeleSila/yhosts/master/hosts
+  #- https://winhelp2002.mvps.org/hosts.txt
   - https://v.firebog.net/hosts/neohostsbasic.txt
-  - https://raw.githubusercontent.com/RooneyMcNibNug/pihole-stuff/master/SNAFU.txt
-  - https://paulgb.github.io/BarbBlock/blacklists/hosts-file.txt
+  # - https://raw.githubusercontent.com/RooneyMcNibNug/pihole-stuff/master/SNAFU.txt
+  # - https://paulgb.github.io/BarbBlock/blacklists/hosts-file.txt
 
 # Advertising lists
   - https://adaway.org/hosts.txt
@@ -365,10 +365,10 @@ adlists:
   - https://raw.githubusercontent.com/anudeepND/blacklist/master/adservers.txt
   - https://s3.amazonaws.com/lists.disconnect.me/simple_ad.txt
   - https://v.firebog.net/hosts/Easylist.txt
-  - https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&mimetype=plaintext
-  - https://raw.githubusercontent.com/FadeMind/hosts.extras/master/UncheckyAds/hosts
-  - https://raw.githubusercontent.com/bigdargon/hostsVN/master/hosts
-  - https://raw.githubusercontent.com/jdlingyu/ad-wars/master/hosts
+  # - https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&mimetype=plaintext
+  # - https://raw.githubusercontent.com/FadeMind/hosts.extras/master/UncheckyAds/hosts
+  # - https://raw.githubusercontent.com/bigdargon/hostsVN/master/hosts
+  # - https://raw.githubusercontent.com/jdlingyu/ad-wars/master/hosts
 
 # Tracking & Telemetry Lists
   - https://v.firebog.net/hosts/Easyprivacy.txt
@@ -393,17 +393,17 @@ adlists:
   - https://gitlab.com/quidsup/notrack-blocklists/raw/master/notrack-malware.txt
   - https://v.firebog.net/hosts/RPiList-Malware.txt
   - https://v.firebog.net/hosts/RPiList-Phishing.txt
-  - https://raw.githubusercontent.com/Spam404/lists/master/main-blacklist.txt
-  - https://raw.githubusercontent.com/AssoEchap/stalkerware-indicators/master/generated/hosts
-  - https://urlhaus.abuse.ch/downloads/hostfile/
-  - https://malware-filter.gitlab.io/malware-filter/phishing-filter-hosts.txt
+  # - https://raw.githubusercontent.com/Spam404/lists/master/main-blacklist.txt
+  # - https://raw.githubusercontent.com/AssoEchap/stalkerware-indicators/master/generated/hosts
+  # - https://urlhaus.abuse.ch/downloads/hostfile/
+  # - https://malware-filter.gitlab.io/malware-filter/phishing-filter-hosts.txt
   - https://v.firebog.net/hosts/Prigent-Malware.txt
 
 # Other Lists
   - https://zerodot1.gitlab.io/CoinBlockerLists/hosts_browser
-  - https://raw.githubusercontent.com/chadmayfield/my-pihole-blocklists/master/lists/pi_blocklist_porn_top1m.list
-  - https://v.firebog.net/hosts/Prigent-Adult.txt
-  - https://raw.githubusercontent.com/anudeepND/blacklist/master/facebook.txt
+  # - https://raw.githubusercontent.com/chadmayfield/my-pihole-blocklists/master/lists/pi_blocklist_porn_top1m.list
+  # - https://v.firebog.net/hosts/Prigent-Adult.txt
+  # - https://raw.githubusercontent.com/anudeepND/blacklist/master/facebook.txt
 
 # -- list of whitelisted domains to import during initial start of the container
 whitelist: 
@@ -438,7 +438,7 @@ hostname: ""
 hostNetwork: "false"
 
 # -- should container run in privileged mode
-privileged: "true"
+privileged: "false"
 
 customVolumes:
   # -- set this to true to enable custom volumes

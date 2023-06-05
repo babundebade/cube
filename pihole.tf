@@ -21,12 +21,15 @@ resource "helm_release" "pihole" {
   repository = "https://mojo2600.github.io/pihole-kubernetes/"
   chart      = "pihole" #mojo2600/pihole
 
-  values = [file("services/pihole/values-pihole.yaml")]
+  values = [templatefile("${path.module}/services/pihole/values-pihole.yaml.tmpl", {
+    ingress_hosts = "pi.cool"
+    serviceDNS_loadBalancerIPv4 = var.dns_IPv4
+  })]
 
   depends_on = [kubernetes_manifest.namespace_pihole]
 }
 
-# resource "kubernetes_ingress_v1" "pihole_ingress" {
+# resource "kubernetes_ingress_v1" "pihole_web_ingress" {
 #   metadata {
 #     name = "pihole-web"
 #     namespace = "pihole"
