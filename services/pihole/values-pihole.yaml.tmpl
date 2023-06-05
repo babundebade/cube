@@ -310,8 +310,8 @@ dnsmasq:
   # - server=/bar.foo/192.168.178.11
 
   # -- Add custom dns entries to override the dns resolution. All lines will be added to the pihole dnsmasq configuration.
-  customDnsEntries: []
-  # - address=/foo.bar/192.168.178.10
+  customDnsEntries: #[]
+   - address=/${pihole_web_url}/${pihole_web_ip}
   # - address=/bar.foo/192.168.178.11
 
   # -- Dnsmasq reads the /etc/hosts file to resolve ips. You can add additional entries if you like
@@ -352,7 +352,7 @@ adlists:
   - https://v.firebog.net/hosts/static/w3kbl.txt
   - https://raw.githubusercontent.com/matomo-org/referrer-spam-blacklist/master/spammers.txt
   - https://someonewhocares.org/hosts/zero/hosts
-  #- https://raw.githubusercontent.com/VeleSila/yhosts/master/hosts
+  - https://raw.githubusercontent.com/VeleSila/yhosts/master/hosts
   #- https://winhelp2002.mvps.org/hosts.txt
   - https://v.firebog.net/hosts/neohostsbasic.txt
   # - https://raw.githubusercontent.com/RooneyMcNibNug/pihole-stuff/master/SNAFU.txt
@@ -367,7 +367,7 @@ adlists:
   - https://v.firebog.net/hosts/Easylist.txt
   # - https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&mimetype=plaintext
   # - https://raw.githubusercontent.com/FadeMind/hosts.extras/master/UncheckyAds/hosts
-  # - https://raw.githubusercontent.com/bigdargon/hostsVN/master/hosts
+  - https://raw.githubusercontent.com/bigdargon/hostsVN/master/hosts
   # - https://raw.githubusercontent.com/jdlingyu/ad-wars/master/hosts
 
 # Tracking & Telemetry Lists

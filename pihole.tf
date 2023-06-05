@@ -24,6 +24,8 @@ resource "helm_release" "pihole" {
   values = [templatefile("${path.module}/services/pihole/values-pihole.yaml.tmpl", {
     ingress_hosts = "pi.cool"
     serviceDNS_loadBalancerIPv4 = var.dns_IPv4
+    pihole_web_url = "pi.cool"
+    pihole_web_ip = "192.168.1.129"
   })]
 
   depends_on = [kubernetes_manifest.namespace_pihole]
