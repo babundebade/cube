@@ -27,3 +27,16 @@ variable "ip_pool_end" {
   default = "192.168.1.135"
   description = "end of IP pool"
 }
+
+variable "email" {
+  type = string
+  default = ""
+  description = "email address for cert-manager"
+  sensitive = true
+}
+
+variable "URL_pihole" {
+  type = string
+  default = "pi.dario.cool"
+  description = "URL for pihole"
+}

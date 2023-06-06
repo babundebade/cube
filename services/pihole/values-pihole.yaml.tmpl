@@ -141,24 +141,25 @@ virtualHost: pihole.local
 # -- Configuration for the Ingress
 ingress:
   # -- Generate a Ingress resource
-  enabled: true #default false
+  enabled: false #default false
 
   # -- Specify an ingressClassName
   ingressClassName: nginx      
 
   # -- Annotations for the ingress
-  annotations: {}
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   path: /admin
   hosts:
     # virtualHost (default value is pi.hole) will be appended to the hosts
     - ${ingress_hosts}
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #     #- virtualHost (default value is pi.hole) will be appended to the hosts
-  #      - chart-example.local
+  tls:
+    - secretName: pihole-tls
+      hosts:
+       #- virtualHost (default value is pi.hole) will be appended to the hosts
+        - ${ingress_hosts}
 
 # -- Probes configuration
 probes:

@@ -17,5 +17,5 @@ resource "helm_release" "ingress_nginx" {
 
   values = [file("services/ingress-nginx/values.yaml")]
 
-  depends_on = [kubernetes_manifest.namespace_ingress_nginx]
+  depends_on = [kubernetes_manifest.namespace_ingress_nginx, helm_release.metallb]
 }

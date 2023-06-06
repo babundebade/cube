@@ -22,34 +22,22 @@ resource "helm_release" "pihole" {
   chart      = "pihole" #mojo2600/pihole
 
   values = [templatefile("${path.module}/services/pihole/values-pihole.yaml.tmpl", {
-    ingress_hosts = "pi.cool"
+    ingress_hosts = var.URL_pihole
     serviceDNS_loadBalancerIPv4 = var.dns_IPv4
-    pihole_web_url = "pi.cool"
+    pihole_web_url = var.URL_pihole
     pihole_web_ip = "192.168.1.129"
   })]
 
-  depends_on = [kubernetes_manifest.namespace_pihole]
+  depends_on = [kubernetes_manifest.namespace_pihole, helm_release.ingress_nginx]
 }
 
-# resource "kubernetes_ingress_v1" "pihole_web_ingress" {
-#   metadata {
-#     name = "pihole-web"
-#     namespace = "pihole"
-#   }
+resource "null_resource" "pihole_ingress" {
+  provisioner "local-exec" {
+    command = "envsubst < ${path.module}/services/pihole/pihole-ingress.yaml | kubectl apply -f -"
 
-#   spec {
-#     rule {
-#       host = "pihole.local"
-#       http {
-#         path {
-#           backend {
-#             serviceName = "pihole-web"
-#             servicePort = 80
-#           }
-#         }
-#       }
-#     }
-#   }
-
-#   depends_on = [helm_release.pihole]
-# }
+    environment = {
+      URL_PIHOLE = var.URL_pihole
+    }
+  }
+  depends_on = [helm_release.cert-manager]
+}

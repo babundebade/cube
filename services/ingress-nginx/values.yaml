@@ -211,7 +211,7 @@ controller:
   ingressClass: nginx
 
   ## New Ingresses without an ingressClassName field specified will be assigned the class specified in `controller.ingressClass`.
-  setAsDefaultIngress: true #defaults to true
+  setAsDefaultIngress: true
 
   ## Comma separated list of namespaces to watch for Ingress resources. By default the Ingress Controller watches all namespaces. Mutually exclusive with "controller.watchNamespaceLabel".
   watchNamespace: ""
@@ -269,7 +269,7 @@ controller:
 
   nginxStatus:
     ## Enable the NGINX stub_status, or the NGINX Plus API.
-    enable: true
+    enable: false
 
     ## Set the port where the NGINX stub_status or the NGINX Plus API is exposed.
     port: 8080
@@ -431,7 +431,7 @@ rbac:
 
 prometheus:
   ## Expose NGINX or NGINX Plus metrics in the Prometheus format.
-  create: false #defaults to true
+  create: true
 
   ## Configures the port to scrape the metrics.
   port: 9113
