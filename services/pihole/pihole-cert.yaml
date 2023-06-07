@@ -5,8 +5,9 @@ metadata:
   namespace: pihole
 spec:
   secretName: ${PIHOLE_SECRET_NAME}
+  issuerRef:
+    name: ca-issuer #${CERT_MANAGER_NAME}
+    kind: ClusterIssuer
+  commonName: ${URL_PIHOLE}
   dnsNames:
   - ${URL_PIHOLE}
-  issuerRef:
-    name: selfsigned-issuer
-    kind: ClusterIssuer

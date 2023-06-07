@@ -37,6 +37,26 @@ variable "email" {
 
 variable "URL_pihole" {
   type        = string
-  default     = "pi.cool"
+  default     = "pi.darioludwig.space"
   description = "URL for pihole"
+}
+
+variable "cert_manager_name" {
+  type        = string
+  default     = "letsencrypt-stgng"
+  description = "name of cert-manager"
+}
+
+variable "cloudflare_dns_api_token" {
+  type        = string
+  default     = ""
+  description = "cloudflare dns api token"
+  sensitive   = true
+}
+
+variable "cloudflare_api_key" {
+  type        = string
+  default     = ""
+  description = "cloudflare api key"
+  sensitive   = true
 }

@@ -33,13 +33,13 @@ resource "helm_release" "pihole" {
 
 variable "pihole_cert_name" {
   type        = string
-  default     = "pihole-crt"
+  default     = "pihole"
   description = "name of certificate"
 }
 
 variable "pihole_secret_name" {
   type        = string
-  default     = "pihole-scrt"
+  default     = "pihole"
   description = "name of secret"
 }
 
@@ -55,32 +55,34 @@ resource "terraform_data" "pihole_secret_name" {
   input = var.pihole_secret_name
 }
 
-resource "null_resource" "pihole_cert" {
-  provisioner "local-exec" {
-    command = "envsubst < ${path.module}/services/pihole/pihole-cert.yaml | kubectl apply -f -"
+# resource "null_resource" "pihole_cert" {
+#   provisioner "local-exec" {
+#     command = "envsubst < ${path.module}/services/pihole/pihole-cert.yaml | kubectl apply -f -"
 
-    environment = {
-      PIHOLE_CERT_NAME   = var.pihole_cert_name
-      PIHOLE_SECRET_NAME = var.pihole_secret_name
-      URL_PIHOLE         = var.URL_pihole
-    }
-  }
-  depends_on = [helm_release.cert-manager]
-  lifecycle {
-    replace_triggered_by = [terraform_data.pihole_cert_name, terraform_data.pihole_secret_name]
-  }
-}
+#     environment = {
+#       CERT_MANAGER_NAME  = var.cert_manager_name
+#       PIHOLE_CERT_NAME   = var.pihole_cert_name
+#       PIHOLE_SECRET_NAME = var.pihole_secret_name
+#       URL_PIHOLE         = var.URL_pihole
+#     }
+#   }
+#   depends_on = [null_resource.cert-manager_issuer]
+#   lifecycle {
+#     replace_triggered_by = [terraform_data.pihole_cert_name, terraform_data.pihole_secret_name]
+#   }
+# }
 
 resource "null_resource" "pihole_ingress" {
   provisioner "local-exec" {
     command = "envsubst < ${path.module}/services/pihole/pihole-ingress.yaml | kubectl apply -f -"
 
     environment = {
+      CERT_MANAGER_NAME  = var.cert_manager_name
       PIHOLE_SECRET_NAME = var.pihole_secret_name
       URL_PIHOLE         = var.URL_pihole
     }
   }
-  depends_on = [helm_release.cert-manager]
+  #depends_on = [null_resource.pihole_cert]
   lifecycle {
     replace_triggered_by = [terraform_data.pihole_ingress, terraform_data.pihole_secret_name]
   }
