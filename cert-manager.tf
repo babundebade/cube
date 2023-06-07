@@ -19,6 +19,11 @@ resource "helm_release" "cert-manager" {
   depends_on = [kubernetes_manifest.namespace_cert_manager, helm_release.metallb]
 }
 
+resource "terraform_data" "cert-manager_input" {
+  input = var.email
+  triggers_replace = [resource.null_resource.cert-manager_issuer]
+}
+
 resource "null_resource" "cert-manager_issuer" {
   provisioner "local-exec" {
     command = "envsubst < ${path.module}/services/cert-manager/issuer.yaml | kubectl apply -f -"

@@ -3,15 +3,15 @@ kind: Ingress
 metadata:
   name: pihole-ingress
   namespace: pihole
-  annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-staging"
+  # annotations:
+  #   cert-manager.io/cluster-issuer: "selfsigned-issuer" #"letsencrypt-staging"
 
 spec:
   ingressClassName: nginx
-  tls:
-  - hosts:
-    - ${URL_PIHOLE}
-    secretName: pihole-tls
+  # tls:
+  # - hosts:
+  #   - ${URL_PIHOLE}
+  #   secretName: ${PIHOLE_SECRET_NAME}
   rules:
   - host: ${URL_PIHOLE}
     http:

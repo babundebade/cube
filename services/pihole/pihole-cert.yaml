@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: ${PIHOLE_CERT_NAME}
+  namespace: pihole
+spec:
+  secretName: ${PIHOLE_SECRET_NAME}
+  dnsNames:
+  - ${URL_PIHOLE}
+  issuerRef:
+    name: selfsigned-issuer
+    kind: ClusterIssuer
