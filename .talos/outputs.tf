@@ -18,17 +18,17 @@ output "kubeconfig" {
 #   filename = "${path.module}/configs/talossecrets.yaml"
 # }
 
-resource "local_sensitive_file" "talosconfig" {
+resource "local_sensitive_file" "talosconfig_file" {
   content  = data.talos_client_configuration.this.talos_config
   filename = "${path.module}/configs/talosconfig"
 }
 
-resource "local_sensitive_file" "kubeconfig" {
+resource "local_sensitive_file" "kubeconfig_file" {
   content  = data.talos_cluster_kubeconfig.this.kubeconfig_raw
   filename = "${path.module}/configs/kubeconfig"
 }
 
-resource "local_sensitive_file" "talosconfig" {
+resource "local_sensitive_file" "talosconfig_main_file" {
   content  = data.talos_client_configuration.this.talos_config
   filename = "/home/dario/.talos/config"
 }
