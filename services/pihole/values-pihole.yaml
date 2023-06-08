@@ -51,7 +51,7 @@ serviceDns:
   externalTrafficPolicy: Local
   
   # -- A fixed `spec.loadBalancerIP` for the DNS Service
-  loadBalancerIP: ${serviceDNS_loadBalancerIPv4}
+  loadBalancerIP: ${PIHOLE_DNS_IP}
   annotations: 
   metallb.universe.tf/address-pool: pihole-pool
   metallb.universe.tf/allow-shared-ip: pihole-pool
@@ -154,12 +154,10 @@ ingress:
   path: /admin
   hosts:
     # virtualHost (default value is pi.hole) will be appended to the hosts
-    - ${ingress_hosts}
   tls:
     - secretName: pihole-tls
       hosts:
        #- virtualHost (default value is pi.hole) will be appended to the hosts
-        - ${ingress_hosts}
 
 # -- Probes configuration
 probes:
@@ -312,7 +310,9 @@ dnsmasq:
 
   # -- Add custom dns entries to override the dns resolution. All lines will be added to the pihole dnsmasq configuration.
   customDnsEntries: #[]
-   - address=/${pihole_web_url}/${pihole_web_ip}
+   - address=/${PIHOLE_CNAME}/${PIHOLE_WEB_IP}
+   - address=/ha.darioludwig.space/192.168.1.131
+  # - address=/foo.bar/
   # - address=/bar.foo/192.168.178.11
 
   # -- Dnsmasq reads the /etc/hosts file to resolve ips. You can add additional entries if you like
@@ -336,13 +336,13 @@ dnsmasq:
   #  - cname=cname.foo.bar,foo.bar
   #  - cname=cname.bar.foo,bar.foo
   #  - cname=cname record,dns record
-  customCnameEntries: []
+  customCnameEntries: 
   # Here we specify custom cname entries that should point to `A` records or
   # elements in customDnsEntries array.
   # The format should be:
-  #   - cname=cname.foo.bar,foo.bar
-  #   - cname=cname.bar.foo,bar.foo
-  #   - cname=cname record,dns record
+  #  - cname=cname.foo.bar,foo.bar
+  #  - cname=cname.bar.foo,bar.foo
+  #  - cname=cname record,dns record
 
 # -- list of adlists to import during initial start of the container
 adlists: 
@@ -412,9 +412,10 @@ whitelist:
    - https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt
 
 # -- list of blacklisted domains to import during initial start of the container
-blacklist: {}
+blacklist: 
   # If you want to have special domains blacklisted, add them here
   # - *.blackist.com
+  - cloud.mikrotik.com
 
 # -- list of blacklisted regex expressions to import during initial start of the container
 regex: {}

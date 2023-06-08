@@ -1,11 +1,18 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: home-assistant
+  name: ha-ingress
   namespace: home-assistant
+  annotations:
+    cert-manager.io/cluster-issuer: selfsigned-issuer
+    kubernetes.io/ingress.class: "nginx"
 spec:
+  tls:
+  - hosts:
+    - ha.darioludwig.space
+    secretName: ha-secret
   rules:
-  - host: homeassistant.example.com
+  - host: ha.darioludwig.space
     http:
       paths:
       - path: /

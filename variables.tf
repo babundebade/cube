@@ -35,9 +35,15 @@ variable "email" {
   sensitive   = true
 }
 
-variable "URL_pihole" {
+variable "tld_domain" {
   type        = string
-  default     = "pi.darioludwig.space"
+  default     = "darioludwig.space"
+  description = "top level domain for projects"
+}
+
+variable "pihole_cname" {
+  type        = string
+  default     = "darioludwig.space"
   description = "URL for pihole"
 }
 

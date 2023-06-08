@@ -9,10 +9,10 @@ metadata:
 spec:
   tls:
   - hosts:
-    - ${URL_PIHOLE}
+    - ${PIHOLE_CNAME}
     secretName: ${PIHOLE_SECRET_NAME}
   rules:
-  - host: ${URL_PIHOLE}
+  - host: ${PIHOLE_CNAME}
     http:
       paths:
       - path: /admin
