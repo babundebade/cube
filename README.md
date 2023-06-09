@@ -4,7 +4,15 @@ Work in progress...
 
 ## Project Overview
 
-The main objective of this project is to create a Kubernetes cluster on Raspberry Pi devices using Talos, an OS designed specifically for Kubernetes. The cluster setup utilizes Terraform for provisioning the necessary infrastructure components but also services.
+The main objective of this project is to create a self-hosted Kubernetes cluster on Raspberry Pi devices using Talos, an OS designed specifically for Kubernetes. The cluster setup utilizes Terraform for provisioning the necessary infrastructure components but also services.
+
+### Repository Structure
+|Directory|Description|
+|:---|:---|
+|[.talos](.talos)|Contains the Talos configuration files|
+|[infrastucture](infrastucture)|Contains all files to setup infrastructure services such as metallb, ingress-nginx, storage, ...|
+|[apps](apps)|Contains all files to setup applications such as home-assistant, nextcloud, ...|
+|[`rdmassets`](rdmassets)|Contains images and other assets used in the README|
 
 ### My Homelab setup:
 
