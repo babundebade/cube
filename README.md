@@ -4,7 +4,7 @@
 
 ## Project Overview
 
-The main objective of this project is to create a self-hosted Kubernetes cluster using Raspberry Pi devices and Talos, an operating system specifically designed for Kubernetes. The cluster setup makes use of Terraform for provisioning the required infrastructure components and services.
+The main objective of this project is to create a self-hosted Kubernetes cluster using Raspberry Pi devices and [Talos](https://www.talos.dev/), an operating system specifically designed for Kubernetes. The cluster setup makes use of Terraform for provisioning the required infrastructure components and services.
 
 ### Repository Structure
 |Directory|Description|
