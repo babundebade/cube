@@ -1,21 +1,24 @@
-# Infrastructure setup above OS level
-**Work in progress. Readme and terraform files will be updated.**
+# Infrastructure Setup Above OS Level
 
-Apps/Services i treat infrastructure as basis for all the other apps.
+**Note: This section is a work in progress. The README and Terraform files will be updated accordingly.**
 
-## kinda working
-- [metallb](https://metallb.universe.tf/)
-- [cert-manager](https://cert-manager.io/)
-- [ingress-nginx](https://kubernetes.github.io/ingress-nginx/)
-- [pihole](https://pi-hole.net/)
+Apps/Services I treat infrastructure as the basis for all the other apps.
 
-## to follow
-- [mayastor](https://mayastor.gitbook.io/introduction/)
-- [minio](https://min.io/)
-- [mqtt](https://mosquitto.org/)
-- Databases (not sure which ones yet)
-  - [mariadb](https://mariadb.org/)
-  - [postgresql](https://www.postgresql.org/)
-  - [cassandra](https://cassandra.apache.org/)
-  - [redis](https://redis.io/)
-  - [mongodb](https://www.mongodb.com/)
+## Currently kinda Working
+
+- [MetalLB](https://metallb.universe.tf/)
+- [Cert-Manager](https://cert-manager.io/)
+- [Ingress-Nginx](https://kubernetes.github.io/ingress-nginx/)
+- [Pi-hole](https://pi-hole.net/)
+
+## To Follow
+
+- [Mayastor](https://mayastor.gitbook.io/introduction/)
+- [MinIO](https://min.io/)
+- [MQTT](https://mosquitto.org/)
+- Databases (specific databases to be determined)
+  - [MariaDB](https://mariadb.org/)
+  - [PostgreSQL](https://www.postgresql.org/)
+  - [Cassandra](https://cassandra.apache.org/)
+  - [Redis](https://redis.io/)
+  - [MongoDB](https://www.mongodb.com/)

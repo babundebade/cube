@@ -7,6 +7,8 @@
 The main objective of this project is to create a self-hosted Kubernetes cluster using Raspberry Pi devices and [Talos](https://www.talos.dev/), an operating system specifically designed for Kubernetes. The cluster setup makes use of Terraform for provisioning the required infrastructure components and services.
 
 ### Repository Structure
+I split the repository into different directories to keep things organized. Each folder is treated as its own terraform project. This helps reduce terraform apply time and workload.
+The following table provides an overview of the different directories and their contents:
 |Directory|Description|
 |:---|:---|
 |[.talos](.talos)|Contains the Talos configuration files|

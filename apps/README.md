@@ -1,8 +1,11 @@
-# All the useful apps for a homelab
-**Work in progress. Readme and terraform files will be updated.**
+# Useful Apps for a Homelab
 
-- [home-assistant](https://www.home-assistant.io/)
-- [nextcloud](https://nextcloud.com/)
-- [mumble](https://www.mumble.info/)
-- [jitsi](https://jitsi.org/)
+**Note: This section is a work in progress. The README and Terraform files will be updated accordingly.**
+
+Here are some useful apps that you can consider for your homelab:
+
+- [Home Assistant](https://www.home-assistant.io/)
+- [Nextcloud](https://nextcloud.com/)
+- [Mumble](https://www.mumble.info/)
+- [Jitsi](https://jitsi.org/)
 - ...
