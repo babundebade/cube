@@ -1,6 +1,6 @@
 variable "cluster_name" {
-  type        = string
   description = "value of cluster_name"
+  type        = string
   default     = "talos-cube"
 }
 
