@@ -1,5 +1,7 @@
 # Infrastructure setup above OS level
-All the apps i treat as infrastructure as basis for all the other apps.
+**Work in progress. Readme and terraform files will be updated.**
+
+Apps/Services i treat infrastructure as basis for all the other apps.
 
 ## kinda working
 - [metallb](https://metallb.universe.tf/)
