@@ -30,10 +30,10 @@ resource "local_sensitive_file" "kubeconfig_file" {
 
 resource "local_sensitive_file" "talosconfig_main_file" {
   content  = data.talos_client_configuration.this.talos_config
-  filename = "/home/dario/.talos/config"
+  filename = pathexpand("~/.talos/config")
 }
 
 resource "local_sensitive_file" "kubeconfig" {
   content  = data.talos_cluster_kubeconfig.this.kubeconfig_raw
-  filename = "/home/dario/.kube/config"
+  filename = pathexpand("~/.kube/config")
 }
