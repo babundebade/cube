@@ -10,7 +10,7 @@ The main objective of this project is to create a self-hosted Kubernetes cluster
 |Directory|Description|
 |:---|:---|
 |[.talos](.talos)|Contains the Talos configuration files|
-|[infrastucture](infrastructure)|Contains all files to setup infrastructure services such as metallb, ingress-nginx, storage, ...|
+|[infrastructure](infrastructure)|Contains all files to setup infrastructure services such as metallb, ingress-nginx, storage, ...|
 |[apps](apps)|Contains all files to setup applications such as home-assistant, nextcloud, ...|
 |[`rdmassets`](rdmassets)|Contains images and other assets used in the README|
 
