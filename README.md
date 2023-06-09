@@ -5,6 +5,7 @@ Work in progress...
 ## Project Overview
 
 The main objective of this project is to create a Kubernetes cluster on Raspberry Pi devices using Talos, an OS designed specifically for Kubernetes. The cluster setup utilizes Terraform for provisioning the necessary infrastructure components but also services.
+![Server-Cube](rdmassets/Pi-Rack.jpg "Raspberry Pi´s in a rack with a router")
 
 ## Contributing
 
