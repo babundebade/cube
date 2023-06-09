@@ -13,14 +13,15 @@ Work in progress...
 The main objective of this project is to create a Kubernetes cluster on Raspberry Pi devices using Talos, an OS designed specifically for Kubernetes. The cluster setup utilizes Terraform for provisioning the necessary infrastructure components but also services.
 
 ### My Homelab setup:
-- TOP Mikrotik router RB4011iGS+5HacQ2HnD-IN
-- <green>**GREEN**</green> Raspberry Pi 3 Model B+ (not in use yet)
-- <yellow>**YELLOW**</yellow> Raspberry Pi 4 Model B (Worker 192.168.1.12)
-- <red>**RED**</red> Raspberry Pi 4 Model B (Worker 192.168.1.11)
-- <blue>**BLUE**</blue> Raspberry Pi 4 Model B (Control Plane 192.168.1.10)
-- [3x SanDisk Ultra Fit 32 GB USB 3.1 Flash Drive](https://www.amazon.de/dp/B09FFK1QLR?psc=1&ref=ppx_yo2ov_dt_b_product_details) on <blue>**BLUE**</blue>, <yellow>**YELLOW**</yellow> and <red>**RED**</red>
-- 2x 1TB SSD for cluster-storage on <yellow>YELLOW</yellow> and <red>RED</red>
-- [1x SONOFF ZigBee 3.0 for smart home devices](https://sonoff.tech/product/gateway-and-sensors/sonoff-zigbee-3-0-usb-dongle-plus-p/) on <blue>BLUE</blue>
+- **TOP** Mikrotik router RB4011iGS+5HacQ2HnD-IN
+---
+|Device|Role|IP|Attachment|
+|:---|:---|:---|:---|
+|<blue>**BLUE**</blue> Raspberry Pi 4 Model B       |Control Plane  |192.168.1.10       |-[32 GB USB 3.1 Flash Drive](https://www.amazon.de/dp/B09FFK1QLR?psc=1&ref=ppx_yo2ov_dt_b_product_details) for Talos OS<br />-[SONOFF ZigBee 3.0](https://sonoff.tech/product/gateway-and-sensors/sonoff-zigbee-3-0-usb-dongle-plus-p/) to connect smart home devices|
+|<red>**RED**</red> Raspberry Pi 4 Model B          |Worker         |192.168.1.11       |-[32 GB USB 3.1 Flash Drive](https://www.amazon.de/dp/B09FFK1QLR?psc=1&ref=ppx_yo2ov_dt_b_product_details) for Talos OS<br />-[1TB 3D NAND SATA 2,5" SSD](https://www.amazon.de/gp/product/B078211KBB/ref=ppx_yo_dt_b_asin_title_o09_s00?ie=UTF8&psc=1) for cluster-storage|
+|<yellow>**YELLOW**</yellow> Raspberry Pi 4 Model B |Worker         |192.168.1.12       |-[32 GB USB 3.1 Flash Drive](https://www.amazon.de/dp/B09FFK1QLR?psc=1&ref=ppx_yo2ov_dt_b_product_details) for Talos OS<br />-[1TB 3D NAND SATA 2,5" SSD](https://www.amazon.de/gp/product/B078211KBB/ref=ppx_yo_dt_b_asin_title_o09_s00?ie=UTF8&psc=1) for cluster-storage|
+|<green>**GREEN**</green> Raspberry Pi 3 Model B+   |Not in use     |~~192.168.1.13~~||
+---
 ![Server-Cube](rdmassets/Pi-Rack.jpg "Raspberry Pi´s in a rack with a router")
 
 ## Contributing
