@@ -1,10 +1,10 @@
 # Raspberry Pi Kubernetes Cluster with Talos
 
-Work in progress...
+**Note: This project is currently a work in progress and will be updated accordingly.**
 
 ## Project Overview
 
-The main objective of this project is to create a self-hosted Kubernetes cluster on Raspberry Pi devices using Talos, an OS designed specifically for Kubernetes. The cluster setup utilizes Terraform for provisioning the necessary infrastructure components but also services.
+The main objective of this project is to create a self-hosted Kubernetes cluster using Raspberry Pi devices and Talos, an operating system specifically designed for Kubernetes. The cluster setup makes use of Terraform for provisioning the required infrastructure components and services.
 
 ### Repository Structure
 |Directory|Description|
@@ -41,5 +41,3 @@ If you find this project helpful and would like to support its development, you 
 [![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.me/lariodudwig)
 
 Your contributions are greatly appreciated!
-
-<style> red { color: red } yellow { color: orange } green { color: green } blue { color: blue } </style> 
