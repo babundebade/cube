@@ -6,7 +6,7 @@
 
 # resource "helm_release" "mayastor" {
 #   name       = "mayastor"
-#   repository = "https://openebs.github.io/mayastor-extensions/ "
+#   repository = "https://openebs.github.io/mayastor-extensions/"
 #   chart      = "mayastor"
 #   namespace  = kubernetes_namespace.mayastor_namespace.metadata[0].name
 

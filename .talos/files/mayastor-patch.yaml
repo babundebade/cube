@@ -7,3 +7,7 @@
   path: /machine/nodeLabels
   value:
     openebs.io/engine: mayastor
+
+- op: add
+  path: /cluster/apiServer/admissionControl/0/configuration/exemptions/namespaces/-
+  value: mayastor

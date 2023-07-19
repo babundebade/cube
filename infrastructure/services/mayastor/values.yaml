@@ -23,7 +23,7 @@ image:
 # Note that if multi-arch images support 'kubernetes.io/arch: amd64'
 # should be removed and set 'nodeSelector' to empty '{}' as default value.
 nodeSelector:
-  kubernetes.io/arch: amd64
+  {} # kubernetes.io/arch: amd64
 
 # -- Pod scheduling priority.
 # Setting this value will apply to all components except the external Chart dependencies.
