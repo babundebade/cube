@@ -2,30 +2,31 @@
 # kind: ClusterIssuer
 # metadata:
 #   name: ${CERT_MANAGER_NAME}
-#   namespace: cert-manager
+#   namespace: ${CERT_MANAGER_NAMESPACE}
 # spec:
 #   acme:
+#     disableAccountKeyGeneration: true
 #     # The ACME server URL
 #     server: https://acme-staging-v02.api.letsencrypt.org/directory
 #     # Email address used for ACME registration
 #     email: ${EMAIL}
 #     # Name of a secret used to store the ACME account private key
 #     privateKeySecretRef:
-#       name: ${CERT_MANAGER_NAME}
+#       name: cloudflare-api-key-secret
 #     # Enable the HTTP-01 challenge provider
 #     solvers:
 #       - dns01:
 #           cloudflare:
 #             email: ${EMAIL}
 #             apiKeySecretRef:
-#               name: cloudflare-api-key-secret
+#               name: cloudflare-secret
 #               key: api-key
 
 
 apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
-  name: selfsigned-issuer
+  name: root-issuer
   namespace: cert-manager
 spec:
   selfSigned: {}

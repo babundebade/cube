@@ -4,19 +4,29 @@ resource "kubernetes_namespace" "namespace_cert_manager" {
   }
 }
 
-# resource "kubernetes_manifest" "namespace_cert_manager" {
-#   manifest = {
-#     "apiVersion" = "v1"
-#     "kind"       = "Namespace"
-#     "metadata" = {
-#       "name" = "cert-manager"
+# resource "terraform_data" "cloudflare_api_token" {
+#   input = var.cloudflare_api_token
+# }
+
+# resource "null_resource" "cloudflare_token_secret" {
+#   provisioner "local-exec" {
+#     command = "envsubst < ${path.module}/services/cert-manager/cloudflare-token-secret.yaml | kubectl apply -f -"
+
+#     environment = {
+#       CLOUDFLARE_API_TOKEN = var.cloudflare_api_token
+#       CERT_MANAGER_NAMESPACE = resource.kubernetes_namespace.namespace_cert_manager.metadata[0].name
 #     }
 #   }
+#   lifecycle {
+#     replace_triggered_by = [terraform_data.cloudflare_api_token]
+#   }
+
+#   depends_on = [kubernetes_namespace.namespace_cert_manager]
 # }
 
 resource "helm_release" "cert-manager" {
   name       = "cert-manager"
-  namespace  = "cert-manager"
+  namespace  = resource.kubernetes_namespace.namespace_cert_manager.metadata[0].name
   repository = "https://charts.jetstack.io"
   chart      = "cert-manager" #jetstack/cert-manager
 
@@ -33,51 +43,73 @@ resource "terraform_data" "cert-manager_name" {
   input = var.cert_manager_name
 }
 
-resource "null_resource" "cert-manager_issuer" {
+resource "null_resource" "root_issuer" {
   provisioner "local-exec" {
-    command = "envsubst < ${path.module}/services/cert-manager/issuer.yaml | kubectl apply -f -"
+    command = "envsubst < ${path.module}/services/cert-manager/root-issuer.yaml | kubectl apply -f -"
 
-    environment = {
-      EMAIL = var.email
-      CERT_MANAGER_NAME = var.cert_manager_name
-    }
+    # environment = {
+    #   EMAIL = var.email
+    #   CERT_MANAGER_NAME = var.cert_manager_name
+    #   CERT_MANAGER_NAMESPACE = resource.kubernetes_namespace.namespace_cert_manager.metadata[0].name
+    # }
   }
-  depends_on = [helm_release.cert-manager, null_resource.cloudflare_api_key_secret]
-  lifecycle {
-    replace_triggered_by = [terraform_data.cert-manager_email, terraform_data.cert-manager_name]
-  }
+    
+  # lifecycle {
+  #   replace_triggered_by = [terraform_data.cert-manager_email, terraform_data.cert-manager_name]
+  # }
+
+  depends_on = [helm_release.cert-manager]
 }
 
-# resource "terraform_data" "cloudflare_dns_api_token" {
-#   input = var.cloudflare_dns_api_token
+resource "null_resource" "root_cert" {
+  provisioner "local-exec" {
+    command = "envsubst < ${path.module}/services/cert-manager/root-cert.yaml | kubectl apply -f -"
+
+    # environment = {
+    #   EMAIL = var.email
+    #   CERT_MANAGER_NAME = var.cert_manager_name
+    #   CERT_MANAGER_NAMESPACE = resource.kubernetes_namespace.namespace_cert_manager.metadata[0].name
+    # }
+  }
+    
+  # lifecycle {
+  #   replace_triggered_by = [terraform_data.cert-manager_email, terraform_data.cert-manager_name]
+  # }
+
+  depends_on = [null_resource.root_issuer]
+}
+
+resource "null_resource" "cert_issuer" {
+  provisioner "local-exec" {
+    command = "envsubst < ${path.module}/services/cert-manager/cert-issuer.yaml | kubectl apply -f -"
+
+    # environment = {
+    #   EMAIL = var.email
+    #   CERT_MANAGER_NAME = var.cert_manager_name
+    #   CERT_MANAGER_NAMESPACE = resource.kubernetes_namespace.namespace_cert_manager.metadata[0].name
+    # }
+  }
+    
+  # lifecycle {
+  #   replace_triggered_by = [terraform_data.cert-manager_email, terraform_data.cert-manager_name]
+  # }
+
+  depends_on = [null_resource.root_cert]
+}
+
+# resource "terraform_data" "cloudflare_api_key" {
+#   input = var.cloudflare_api_key
 # }
 
-# resource "null_resource" "cloudflare_token_secret" {
+# resource "null_resource" "cloudflare_api_key_secret" {
 #   provisioner "local-exec" {
-#     command = "envsubst < ${path.module}/services/cert-manager/cloudflare-secret.yaml | kubectl apply -f -"
+#     command = "envsubst < ${path.module}/services/cert-manager/cloudflare-api-key-secret.yaml | kubectl apply -f -"
 
 #     environment = {
-#       CLOUDFLARE_API_TOKEN = var.cloudflare_dns_api_token
+#       CLOUDFLARE_API_KEY = var.cloudflare_api_key
 #     }
 #   }
 #   lifecycle {
-#     replace_triggered_by = [terraform_data.cloudflare_dns_api_token]
+#     replace_triggered_by = [terraform_data.cloudflare_api_key]
 #   }
 # }
-
-resource "terraform_data" "cloudflare_api_key" {
-  input = var.cloudflare_api_key
-}
-
-resource "null_resource" "cloudflare_api_key_secret" {
-  provisioner "local-exec" {
-    command = "envsubst < ${path.module}/services/cert-manager/cloudflare-api-key-secret.yaml | kubectl apply -f -"
-
-    environment = {
-      CLOUDFLARE_API_KEY = var.cloudflare_api_key
-    }
-  }
-  lifecycle {
-    replace_triggered_by = [terraform_data.cloudflare_api_key]
-  }
-}

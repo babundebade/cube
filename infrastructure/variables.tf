@@ -49,11 +49,11 @@ variable "pihole_cname" {
 
 variable "cert_manager_name" {
   type        = string
-  default     = "letsencrypt-stgng"
+  default     = "cert-issuer"
   description = "name of cert-manager"
 }
 
-variable "cloudflare_dns_api_token" {
+variable "cloudflare_api_token" {
   type        = string
   default     = ""
   description = "cloudflare dns api token"
