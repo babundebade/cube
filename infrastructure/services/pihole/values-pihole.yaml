@@ -410,6 +410,11 @@ adlists:
 whitelist: 
   # If you want to provide whitelisted domains, add them here.
    - https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt
+   - (\.|^)zeit\.de$
+   - (\.|^)tagesschau\.de$
+   - zeit.de
+   - tagesschau.de
+   - spotify.com
 
 # -- list of blacklisted domains to import during initial start of the container
 blacklist: 
