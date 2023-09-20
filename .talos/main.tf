@@ -1,5 +1,5 @@
 resource "talos_machine_secrets" "this" {
-  talos_version = "v1.4.5"
+  talos_version = "v1.5.0"
 }
 
 data "talos_machine_configuration" "controlplane" {
@@ -7,8 +7,8 @@ data "talos_machine_configuration" "controlplane" {
   cluster_endpoint   = var.cluster_endpoint
   machine_type       = "controlplane"
   machine_secrets    = talos_machine_secrets.this.machine_secrets
-  kubernetes_version = "v1.26.4"
-  talos_version      = "v1.4.5"
+  kubernetes_version = "v1.26.8"
+  talos_version      = "v1.5.0"
   docs               = true
 }
 
@@ -17,8 +17,8 @@ data "talos_machine_configuration" "worker" {
   cluster_endpoint   = var.cluster_endpoint
   machine_type       = "worker"
   machine_secrets    = talos_machine_secrets.this.machine_secrets
-  kubernetes_version = "v1.26.4"
-  talos_version      = "v1.4.5"
+  kubernetes_version = "v1.26.8"
+  talos_version      = "v1.5.0"
   docs               = true
 }
 
