@@ -1,10 +1,6 @@
-resource "kubernetes_manifest" "namespace_metallb_system" {
-  manifest = {
-    "apiVersion" = "v1"
-    "kind"       = "Namespace"
-    "metadata" = {
-      "name" = "metallb-system"
-    }
+resource "kubernetes_namespace" "metallb_namespace" {
+  metadata {
+    name = "metallb-system"
   }
 }
 
@@ -12,7 +8,7 @@ resource "null_resource" "kubeconfig_metallb" {
   provisioner "local-exec" {
     command = "kubectl label ns metallb-system pod-security.kubernetes.io/enforce=privileged"
   }
-  depends_on = [kubernetes_manifest.namespace_metallb_system]
+  depends_on = [kubernetes_namespace.metallb_namespace]
 }
 
 resource "helm_release" "metallb" {

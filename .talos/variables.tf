@@ -10,6 +10,18 @@ variable "cluster_endpoint" {
   default     = "https://192.168.1.10:6443"
 }
 
+variable "talos_version" {
+  description = "The version of Talos to use"
+  type        = string
+  default     = "v1.5.3"
+}
+
+variable "kubernetes_version" {
+  description = "The version of Kubernetes to use"
+  type        = string
+  default     = "v1.28.2"
+}
+
 variable "node_data" {
   description = "A map of node data"
   type = object({

@@ -1,10 +1,6 @@
-resource "kubernetes_manifest" "namespace_ingress_nginx" {
-  manifest = {
-    "apiVersion" = "v1"
-    "kind"       = "Namespace"
-    "metadata" = {
-      "name" = "nginx-ingress"
-    }
+resource "kubernetes_namespace" "namespace_ingress_nginx" {
+  metadata {
+    name = "nginx-ingress"
   }
 }
 
@@ -17,5 +13,5 @@ resource "helm_release" "ingress_nginx" {
 
   values = [file("services/ingress-nginx/values.yaml")]
 
-  depends_on = [kubernetes_manifest.namespace_ingress_nginx, helm_release.metallb]
+  depends_on = [kubernetes_namespace.namespace_ingress_nginx, helm_release.metallb]
 }
