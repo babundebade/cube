@@ -10,6 +10,9 @@ data "talos_machine_configuration" "controlplane" {
   kubernetes_version = var.kubernetes_version
   talos_version      = var.talos_version
   docs               = true
+  config_patches = [
+    file("${path.module}/files/cp-patch.yaml"),
+  ]
 }
 
 data "talos_machine_configuration" "worker" {
@@ -20,6 +23,9 @@ data "talos_machine_configuration" "worker" {
   kubernetes_version = var.kubernetes_version
   talos_version      = var.talos_version
   docs               = true
+  config_patches = [
+    file("${path.module}/files/cp-patch.yaml"),
+  ]
 }
 
 data "talos_client_configuration" "this" {
@@ -38,7 +44,6 @@ resource "talos_machine_configuration_apply" "controlplane" {
       hostname     = each.value.hostname == null ? format("%s-cp-%s", var.cluster_name, index(keys(var.node_data.controlplanes), each.key)) : each.value.hostname
       install_disk = each.value.install_disk
     }),
-    file("${path.module}/files/cp-patch.yaml"),
   ]
 }
 
@@ -52,7 +57,6 @@ resource "talos_machine_configuration_apply" "worker" {
       hostname     = each.value.hostname == null ? format("%s-worker-%s", var.cluster_name, index(keys(var.node_data.workers), each.key)) : each.value.hostname
       install_disk = each.value.install_disk
     }),
-    file("${path.module}/files/worker-patch.yaml"),
   ]
 }
 
@@ -68,5 +72,4 @@ data "talos_cluster_kubeconfig" "this" {
 
   client_configuration = talos_machine_secrets.this.client_configuration
   node                 = [for k, v in var.node_data.controlplanes : k][0]
-  wait                 = true
 }
