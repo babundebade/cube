@@ -32,18 +32,18 @@ resource "local_sensitive_file" "talosconfig_main_file" {
   content  = data.talos_client_configuration.this.talos_config
   filename = pathexpand("~/.talos/config")
 
-  lifecycle {
-    prevent_destroy = true
-  }
+  # lifecycle {
+  #   prevent_destroy = true
+  # }
 }
 
 resource "local_sensitive_file" "kubeconfig" {
   content  = data.talos_cluster_kubeconfig.this.kubeconfig_raw
   filename = pathexpand("~/.kube/config")
 
-  lifecycle {
-    prevent_destroy = true
-  }
+  # lifecycle {
+  #   prevent_destroy = true
+  # }
 }
 
 resource "local_sensitive_file" "talos_machine_configuration_cp_file" {

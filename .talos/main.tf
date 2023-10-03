@@ -45,6 +45,7 @@ resource "talos_machine_configuration_apply" "controlplane" {
       install_disk = each.value.install_disk
     }),
   ]
+  apply_mode = "auto"
 }
 
 resource "talos_machine_configuration_apply" "worker" {
@@ -58,6 +59,7 @@ resource "talos_machine_configuration_apply" "worker" {
       install_disk = each.value.install_disk
     }),
   ]
+  apply_mode = "auto"
 }
 
 resource "talos_machine_bootstrap" "this" {
