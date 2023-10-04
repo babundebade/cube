@@ -4,3 +4,4 @@
 .talos/configs
 kubeconfig_cube
 .vscode
+certs
