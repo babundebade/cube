@@ -12,6 +12,11 @@ terraform {
       # https://registry.terraform.io/providers/hashicorp/helm/latest
     }
 
+    tls = {
+      source  = "hashicorp/tls"
+      version = "4.0.4"
+    }
+
     mikrotik = {
       source  = "kube-cloud/mikrotik"
       version = "0.13.0"
@@ -30,3 +35,5 @@ provider "helm" {
     config_path = pathexpand("~/.kube/config") #var.cluster_kubeconfig_path
   }
 }
+
+provider "tls" {}

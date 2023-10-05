@@ -24,7 +24,7 @@ resource "helm_release" "pihole" {
     TLD_DOMAIN    = var.tld_domain
   })]
 
-  depends_on = [helm_release.ingress_nginx]
+  depends_on = [helm_release.ingress_nginx, helm_release.cert-manager]
 }
 
 variable "pihole_cert_name" {
@@ -67,21 +67,21 @@ resource "null_resource" "pihole_ingress" {
   }
 }
 
-resource "null_resource" "pihole_cert" {
-  provisioner "local-exec" {
-    command = "envsubst < ${path.module}/services/pihole/pihole-cert.yaml | kubectl apply -f -"
+# resource "null_resource" "pihole_cert" {
+#   provisioner "local-exec" {
+#     command = "envsubst < ${path.module}/services/pihole/pihole-cert.yaml | kubectl apply -f -"
 
-    environment = {
-      EMAIL = var.email
-      CERT_MANAGER_NAME = var.cert_manager_name
-      CERT_MANAGER_NAMESPACE = resource.kubernetes_namespace.namespace_cert_manager.metadata[0].name
-      PIHOLE_SECRET_NAME = var.pihole_secret_name
-    }
-  }
+#     environment = {
+#       EMAIL = var.email
+#       CERT_MANAGER_NAME = var.cert_manager_name
+#       CERT_MANAGER_NAMESPACE = resource.kubernetes_namespace.namespace_cert_manager.metadata[0].name
+#       PIHOLE_SECRET_NAME = var.pihole_secret_name
+#     }
+#   }
     
-  lifecycle {
-    replace_triggered_by = [terraform_data.cert-manager_email, terraform_data.cert-manager_name]
-  }
+#   lifecycle {
+#     replace_triggered_by = [terraform_data.cert-manager_email, terraform_data.cert-manager_name]
+#   }
 
-  depends_on = [null_resource.root_issuer, resource.kubernetes_namespace.namespace_cert_manager]
-}
+#   depends_on = [null_resource.root_issuer, resource.kubernetes_namespace.namespace_cert_manager]
+# }

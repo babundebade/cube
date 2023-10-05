@@ -23,6 +23,34 @@ resource "terraform_data" "cert-manager_name" {
   input = var.cert_manager_name
 }
 
+resource "tls_private_key" "cert_key" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
+resource "tls_self_signed_cert" "cert" {
+  private_key_pem = tls_private_key.cert_key.private_key_pem
+
+  subject {
+    common_name = var.tld_domain
+  }
+  is_ca_certificate = true
+  validity_period_hours = 8760
+
+  allowed_uses = ["any_extended", "cert_signing"]
+}
+
+resource "kubernetes_secret" "root_secret" {
+  metadata {
+    name = "root-secret"
+  }
+
+  data = {
+    "tls.crt" = tls_self_signed_cert.cert.cert_pem
+    "tls.key" = tls_private_key.cert_key.private_key_pem
+  }
+}
+
 resource "null_resource" "root_issuer" {
   provisioner "local-exec" {
     command = "envsubst < ${path.module}/services/cert-manager/root-issuer.yaml | kubectl apply -f -"
@@ -33,7 +61,7 @@ resource "null_resource" "root_issuer" {
     #   CERT_MANAGER_NAMESPACE = resource.kubernetes_namespace.namespace_cert_manager.metadata[0].name
     # }
   }
-    
+
   # lifecycle {
   #   replace_triggered_by = [terraform_data.cert-manager_email, terraform_data.cert-manager_name]
   # }
@@ -51,7 +79,7 @@ resource "null_resource" "root_cert" {
     #   CERT_MANAGER_NAMESPACE = resource.kubernetes_namespace.namespace_cert_manager.metadata[0].name
     # }
   }
-    
+
   # lifecycle {
   #   replace_triggered_by = [terraform_data.cert-manager_email, terraform_data.cert-manager_name]
   # }
@@ -69,7 +97,7 @@ resource "null_resource" "cert_issuer" {
     #   CERT_MANAGER_NAMESPACE = resource.kubernetes_namespace.namespace_cert_manager.metadata[0].name
     # }
   }
-    
+
   # lifecycle {
   #   replace_triggered_by = [terraform_data.cert-manager_email, terraform_data.cert-manager_name]
   # }
