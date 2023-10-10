@@ -7,9 +7,9 @@ resource "kubernetes_namespace" "namespace_ingress_nginx" {
 resource "helm_release" "ingress_nginx" {
   name       = "nginx-ingress"
   namespace  = "nginx-ingress"
-  repository = "https://helm.nginx.com/stable"
-  chart      = "nginx-ingress"
-  #version    = "0.17.1"
+  repository = "https://kubernetes.github.io/ingress-nginx"
+  chart      = "ingress-nginx"
+  version    = "4.8.1"
 
   values = [file("services/ingress-nginx/values.yaml")]
 
