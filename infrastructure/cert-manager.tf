@@ -28,6 +28,11 @@ resource "tls_private_key" "cert_key" {
   rsa_bits  = 4096
 }
 
+resource "local_sensitive_file" "ca_crt" {
+  content  = tls_private_key.cert_key.private_key_pem
+  filename = "/home/dario/cube/certs/ca.crt"
+}
+
 resource "tls_self_signed_cert" "cert" {
   private_key_pem = tls_private_key.cert_key.private_key_pem
 
@@ -38,11 +43,25 @@ resource "tls_self_signed_cert" "cert" {
   validity_period_hours = 8760
 
   allowed_uses = ["any_extended", "cert_signing"]
+
+  lifecycle {
+    prevent_destroy = true
+  }
+}
+
+resource "local_sensitive_file" "x509_ca_crt" {
+  content  = tls_self_signed_cert.cert.cert_pem
+  filename = "/home/dario/cube/certs/x509_ca.crt"
+
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 resource "kubernetes_secret" "root_secret" {
   metadata {
     name = "root-secret"
+    namespace = resource.kubernetes_namespace.namespace_cert_manager.metadata[0].name
   }
 
   data = {

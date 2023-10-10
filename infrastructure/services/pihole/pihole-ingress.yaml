@@ -5,8 +5,9 @@ metadata:
   namespace: pihole
   annotations:
     cert-manager.io/cluster-issuer: cert-issuer
-    kubernetes.io/ingress.class: nginx
+    #kubernetes.io/ingress.class: nginx
 spec:
+  ingressClassName: nginx
   tls:
   - hosts:
     - ${PIHOLE_CNAME}
