@@ -8,7 +8,7 @@ resource "helm_release" "cert-manager" {
   name       = "cert-manager"
   namespace  = resource.kubernetes_namespace.namespace_cert_manager.metadata[0].name
   repository = "https://charts.jetstack.io"
-  chart      = "cert-manager" #jetstack/cert-manager
+  chart      = "cert-manager"
 
   values = [file("${path.module}/services/cert-manager/values.yaml")]
 
@@ -38,24 +38,26 @@ resource "tls_self_signed_cert" "cert" {
 
   subject {
     common_name = var.tld_domain
+    country = "DE"
+    organization = "Dario"
   }
   is_ca_certificate = true
   validity_period_hours = 8760
 
-  allowed_uses = ["any_extended", "cert_signing"]
+  allowed_uses = ["cert_signing"]
 
-  lifecycle {
-    prevent_destroy = true
-  }
+  # lifecycle {
+  #   prevent_destroy = true
+  # }
 }
 
 resource "local_sensitive_file" "x509_ca_crt" {
   content  = tls_self_signed_cert.cert.cert_pem
   filename = "/home/dario/cube/certs/x509_ca.crt"
 
-  lifecycle {
-    prevent_destroy = true
-  }
+  # lifecycle {
+  #   prevent_destroy = true
+  # }
 }
 
 resource "kubernetes_secret" "root_secret" {
@@ -123,20 +125,3 @@ resource "null_resource" "cert_issuer" {
 
   depends_on = [null_resource.root_cert]
 }
-
-# resource "terraform_data" "cloudflare_api_key" {
-#   input = var.cloudflare_api_key
-# }
-
-# resource "null_resource" "cloudflare_api_key_secret" {
-#   provisioner "local-exec" {
-#     command = "envsubst < ${path.module}/services/cert-manager/cloudflare-api-key-secret.yaml | kubectl apply -f -"
-
-#     environment = {
-#       CLOUDFLARE_API_KEY = var.cloudflare_api_key
-#     }
-#   }
-#   lifecycle {
-#     replace_triggered_by = [terraform_data.cloudflare_api_key]
-#   }
-# }
