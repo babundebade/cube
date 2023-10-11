@@ -22,11 +22,38 @@ resource "helm_release" "home_assistant" {
   depends_on = [kubernetes_namespace.home_assistant_namespace, null_resource.kubeconfig_home_assistant]
 }
 
-resource "null_resource" "home_assistant_ingress" {
-  provisioner "local-exec" {
-    command = "envsubst < ${path.module}/services/home-assistant/ha-ingress.yaml | kubectl apply -f -"
+resource "kubernetes_ingress_v1" "ha_ingress" {
+  metadata {
+    name      = "home-assistant-ingress"
+    namespace = kubernetes_namespace.home_assistant_namespace.metadata[0].name
+    annotations = {
+      "cert-manager.io/cluster-issuer" = "cert-issuer"
+    }
   }
-  depends_on = [helm_release.home_assistant]
+
+  spec {
+    ingress_class_name = "nginx"
+    tls {
+      hosts = ["ha.darioludwig.space", "192.168.1.131"]
+      secret_name = "ha-secret"
+    }
+    rule {
+      host = "ha.darioludwig.space"
+      http {
+        path {
+          path = "/"
+          backend {
+            service {
+              name = "home-assistant"
+              port {
+                number = 8123
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 resource "kubernetes_persistent_volume_claim" "ha_pvc" {
