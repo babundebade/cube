@@ -22,6 +22,12 @@ terraform {
       version = "0.13.0"
       # https://registry.terraform.io/providers/kube-cloud/mikrotik/latest
     }
+
+    k8s = {
+      source = "metio/k8s"
+      version = "2023.9.4"
+      # https://registry.terraform.io/providers/metio/k8s/latest/docs
+    }
   }
 }
 
@@ -37,3 +43,5 @@ provider "helm" {
 }
 
 provider "tls" {}
+
+provider "k8s" {}

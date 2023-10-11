@@ -49,6 +49,7 @@ resource "tls_self_signed_cert" "cert" {
   # lifecycle {
   #   prevent_destroy = true
   # }
+  depends_on = [ helm_release.cert-manager ]
 }
 
 resource "local_sensitive_file" "x509_ca_crt" {
@@ -72,56 +73,103 @@ resource "kubernetes_secret" "root_secret" {
   }
 }
 
-resource "null_resource" "root_issuer" {
-  provisioner "local-exec" {
-    command = "envsubst < ${path.module}/services/cert-manager/root-issuer.yaml | kubectl apply -f -"
-
-    # environment = {
-    #   EMAIL = var.email
-    #   CERT_MANAGER_NAME = var.cert_manager_name
-    #   CERT_MANAGER_NAMESPACE = resource.kubernetes_namespace.namespace_cert_manager.metadata[0].name
-    # }
+resource "k8s_cert_manager_io_cluster_issuer_v1" "root_issuer" {
+  metadata = {
+    name      = "root-issuer"
+    namespace = resource.kubernetes_namespace.namespace_cert_manager.metadata[0].name
   }
-
-  # lifecycle {
-  #   replace_triggered_by = [terraform_data.cert-manager_email, terraform_data.cert-manager_name]
-  # }
-
-  depends_on = [helm_release.cert-manager]
+  spec = {
+    self_signed = {}
+  }
+  depends_on = [ helm_release.cert-manager ]
 }
 
-resource "null_resource" "root_cert" {
-  provisioner "local-exec" {
-    command = "envsubst < ${path.module}/services/cert-manager/root-cert.yaml | kubectl apply -f -"
+# resource "null_resource" "root_issuer" {
+#   provisioner "local-exec" {
+#     command = "envsubst < ${path.module}/services/cert-manager/root-issuer.yaml | kubectl apply -f -"
 
-    # environment = {
-    #   EMAIL = var.email
-    #   CERT_MANAGER_NAME = var.cert_manager_name
-    #   CERT_MANAGER_NAMESPACE = resource.kubernetes_namespace.namespace_cert_manager.metadata[0].name
-    # }
+#     # environment = {
+#     #   EMAIL = var.email
+#     #   CERT_MANAGER_NAME = var.cert_manager_name
+#     #   CERT_MANAGER_NAMESPACE = resource.kubernetes_namespace.namespace_cert_manager.metadata[0].name
+#     # }
+#   }
+
+#   # lifecycle {
+#   #   replace_triggered_by = [terraform_data.cert-manager_email, terraform_data.cert-manager_name]
+#   # }
+
+#   depends_on = [helm_release.cert-manager]
+# }
+
+resource "k8s_cert_manager_io_certificate_v1" "root_cert" {
+  metadata = {
+    name = "root-ca"
+    namespace = resource.kubernetes_namespace.namespace_cert_manager.metadata[0].name
   }
-
-  # lifecycle {
-  #   replace_triggered_by = [terraform_data.cert-manager_email, terraform_data.cert-manager_name]
-  # }
-
-  depends_on = [null_resource.root_issuer]
+  spec = {
+    is_ca = true
+    common_name = "root-ca"
+    secret_name = resource.kubernetes_secret.root_secret.metadata[0].name
+    private_key = {
+      algorithm = "ECDSA"
+      size = 256
+    }
+    issuer_ref = {
+      name = "root-issuer"
+      kind = "ClusterIssuer"
+      group = "cert-manager.io"
+    }
+  }
 }
 
-resource "null_resource" "cert_issuer" {
-  provisioner "local-exec" {
-    command = "envsubst < ${path.module}/services/cert-manager/cert-issuer.yaml | kubectl apply -f -"
+# resource "null_resource" "root_cert" {
+#   provisioner "local-exec" {
+#     command = "envsubst < ${path.module}/services/cert-manager/root-cert.yaml | kubectl apply -f -"
 
-    # environment = {
-    #   EMAIL = var.email
-    #   CERT_MANAGER_NAME = var.cert_manager_name
-    #   CERT_MANAGER_NAMESPACE = resource.kubernetes_namespace.namespace_cert_manager.metadata[0].name
-    # }
+#     # environment = {
+#     #   EMAIL = var.email
+#     #   CERT_MANAGER_NAME = var.cert_manager_name
+#     #   CERT_MANAGER_NAMESPACE = resource.kubernetes_namespace.namespace_cert_manager.metadata[0].name
+#     # }
+#   }
+
+#   # lifecycle {
+#   #   replace_triggered_by = [terraform_data.cert-manager_email, terraform_data.cert-manager_name]
+#   # }
+
+#   depends_on = [k8s_cert_manager_io_cluster_issuer_v1.root_issuer]
+# }
+
+resource "k8s_cert_manager_io_cluster_issuer_v1" "cert_issuer" {
+  metadata = {
+    name = "cert-issuer"
+    namespace = resource.kubernetes_namespace.namespace_cert_manager.metadata[0].name
   }
 
-  # lifecycle {
-  #   replace_triggered_by = [terraform_data.cert-manager_email, terraform_data.cert-manager_name]
-  # }
+  spec = {
+    ca = {
+      secret_name = "root_secret"
+    }
+  }
 
-  depends_on = [null_resource.root_cert]
+  depends_on = [ helm_release.cert-manager ]
 }
+
+# resource "null_resource" "cert_issuer" {
+#   provisioner "local-exec" {
+#     command = "envsubst < ${path.module}/services/cert-manager/cert-issuer.yaml | kubectl apply -f -"
+
+#     # environment = {
+#     #   EMAIL = var.email
+#     #   CERT_MANAGER_NAME = var.cert_manager_name
+#     #   CERT_MANAGER_NAMESPACE = resource.kubernetes_namespace.namespace_cert_manager.metadata[0].name
+#     # }
+#   }
+
+#   # lifecycle {
+#   #   replace_triggered_by = [terraform_data.cert-manager_email, terraform_data.cert-manager_name]
+#   # }
+
+#   depends_on = [null_resource.root_cert]
+# }

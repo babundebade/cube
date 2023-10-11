@@ -39,33 +39,70 @@ variable "pihole_secret_name" {
   description = "name of secret"
 }
 
-resource "terraform_data" "pihole_ingress" {
+resource "terraform_data" "pihole_cname" {
   input = var.pihole_cname
 }
 
-resource "terraform_data" "pihole_cert_name" {
-  input = var.pihole_cert_name
-}
+# resource "terraform_data" "pihole_cert_name" {
+#   input = var.pihole_cert_name
+# }
 
 resource "terraform_data" "pihole_secret_name" {
   input = var.pihole_secret_name
 }
 
-resource "null_resource" "pihole_ingress" {
-  provisioner "local-exec" {
-    command = "envsubst < ${path.module}/services/pihole/pihole-ingress.yaml | kubectl apply -f -"
-
-    environment = {
-      CERT_MANAGER_NAME  = var.cert_manager_name
-      PIHOLE_SECRET_NAME = var.pihole_secret_name
-      PIHOLE_CNAME  = var.pihole_cname
+resource "kubernetes_ingress_v1" "pihole_ingress" {
+  metadata {
+    name      = "pihole-ingress"
+    namespace = kubernetes_namespace.pihole_namespace.metadata[0].name
+    annotations = {
+      #"kubernetes.io/ingress.class" = "nginx"
+      "cert-manager.io/cluster-issuer" = "cert-issuer"
+      #"nginx.ingress.kubernetes.io/rewrite-target" = "/"
     }
   }
-  #depends_on = [null_resource.pihole_cert]
-  lifecycle {
-    replace_triggered_by = [terraform_data.pihole_ingress, terraform_data.pihole_secret_name]
+
+  spec {
+    ingress_class_name = "nginx"
+    tls {
+      hosts = [var.pihole_cname]
+      secret_name = terraform_data.pihole_secret_name.input
+    }
+    rule {
+      host = var.pihole_cname
+      http {
+        path {
+          path = "/admin"
+          backend {
+            service {
+              name = "pihole-web"
+              port {
+                number = 80
+              }
+            }
+          }
+        }
+      }
+    }
   }
+  depends_on = [ helm_release.ingress_nginx, helm_release.cert-manager ]
 }
+
+# resource "null_resource" "pihole_ingress" {
+#   provisioner "local-exec" {
+#     command = "envsubst < ${path.module}/services/pihole/pihole-ingress.yaml | kubectl apply -f -"
+
+#     environment = {
+#       CERT_MANAGER_NAME  = var.cert_manager_name
+#       PIHOLE_SECRET_NAME = var.pihole_secret_name
+#       PIHOLE_CNAME  = var.pihole_cname
+#     }
+#   }
+#   #depends_on = [null_resource.pihole_cert]
+#   lifecycle {
+#     replace_triggered_by = [terraform_data.pihole_ingress, terraform_data.pihole_secret_name]
+#   }
+# }
 
 # resource "null_resource" "pihole_cert" {
 #   provisioner "local-exec" {

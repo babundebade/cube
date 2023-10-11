@@ -120,3 +120,26 @@ provider "registry.terraform.io/kube-cloud/mikrotik" {
     "zh:edc9ae165c1ea01b190f5382cf61fa32befd8eb0187b7409dc9315e4b75462e8",
   ]
 }
+
+provider "registry.terraform.io/metio/k8s" {
+  version     = "2023.9.4"
+  constraints = "2023.9.4"
+  hashes = [
+    "h1:IJjHkauqRMlD3FCH0n+fLXxRMR7prRsYuYR5syH3eJY=",
+    "zh:168619c4d9378f569ec3fca55004ffc066460ccea0c2a5fdc5b9994dde57f6c5",
+    "zh:19673c0ddb9bb0c8199bd5c147fc4baa83800002eac37607571379dd7b5a0a14",
+    "zh:1c317c6441db02c2df89e12f07443c0c8b5c8ccdfd873d8b4b083b1fbbe5043b",
+    "zh:37bc0af1465cfd1c2a2f450132339d807633178e3d558ca711df7dd0f6cc5445",
+    "zh:3a50c0fd5b89889bc3e5fef7c3cfd56b3355fa7db9b7dd4f2d0064376a3c5f32",
+    "zh:54675e940c02f7ca584e33a7efec75b2e3ee844a96b08e7f9e6a5eb7bd2c7b37",
+    "zh:79747248519e568f8b2292cbd97278616637bb55be44f0fe089c2a12f4f7f6b6",
+    "zh:97fd06282581f674e3f28bd2f6c3eabf67f978b9da8cd3a9cfc2a0032c7262a5",
+    "zh:b8ffcd72c4180c342b2f3682e0d293b68b0c01dc72d9d39031585271f5027c9d",
+    "zh:bb918aa70f24b465637c9ff77e193b5e35b3e0612ff119a583b593681faa713d",
+    "zh:d4238087b0a918287756bf3c5bd22a8fad38585ab5f6cf4d2a0ef8a0c446edd6",
+    "zh:d5742055ffb914ef51a075f1047cf323a34e24f2e11fbd4cba7d2c465a183998",
+    "zh:d64c5d16ec37fbabf687c0a2905f6f9473b7ec736cbc76cf7cdbadcf1df6ff37",
+    "zh:dd8029b526269c8aae3a0f1729e844a1172a2bac65a540d92cfc5e81e2afe4bb",
+    "zh:f809ab383cca0a5f83072981c64208cbd7fa67e986a86ee02dd2c82333221e32",
+  ]
+}
