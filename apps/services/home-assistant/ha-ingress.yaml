@@ -4,9 +4,9 @@ metadata:
   name: ha-ingress
   namespace: home-assistant
   annotations:
-    cert-manager.io/cluster-issuer: selfsigned-issuer
-    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: cert-issuer
 spec:
+  ingressClassName: nginx
   tls:
   - hosts:
     - ha.darioludwig.space

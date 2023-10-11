@@ -34,27 +34,11 @@ resource "kubernetes_config_map" "configmap_openebs_jiva" {
   depends_on = [kubernetes_namespace.namespace_openebs_jiva]
 }
 
-resource "kubernetes_daemonset" "openebs_jiva_csi_node_daemonset" {
-  metadata {
-    name      = "openebs-jiva-csi-node"
-    namespace = kubernetes_namespace.namespace_openebs_jiva.metadata[0].name
+resource "null_resource" "jiva_daemonset_patch" {
+  provisioner "local-exec" {
+    command = "kubectl patch daemonset openebs-jiva-csi-node -n openebs-jiva --type='json' -p='[{\"op\": \"replace\", \"path\": \"/spec/template/spec/hostPID\", \"value\": true}]'"
   }
-
-  spec {
-    selector {
-      match_labels = {
-        app = "openebs-jiva-csi-node"
-      }
-    }
-    template {
-      metadata {
-        name = "openebs-jiva-csi-node"
-      }
-      spec {
-        host_pid = true
-      }
-    }
-  }
-
-  depends_on = [helm_release.openebs-jiva]
+  depends_on = [helm_release.openebs-jiva, kubernetes_config_map.configmap_openebs_jiva]
 }
+
+

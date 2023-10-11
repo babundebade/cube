@@ -39,7 +39,7 @@ securityContext:
   # runAsUser: 1000
 
 service:
-  type: LoadBalancer #ClusterIP
+  type: ClusterIP
   port: 8123
 
 # -- Enables host networking (so that home assistant can scan devices automatically on the same network). If set to false, you might want to amend dnsPolicy value as well
@@ -49,20 +49,21 @@ hostNetwork: true
 dnsPolicy: ClusterFirstWithHostNet
 
 ingress:
-  enabled: true
-  className: ""
+  enabled: false
+  className: "nginx"
   annotations:
+    kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: selfsigned-issuer
-    kubernetes.io/ingress.class: "nginx"
+    # kubernetes.io/tls-acme: "true"
   hosts:
     - host: ha.darioludwig.space
       paths:
         - path: /
           pathType: ImplementationSpecific
   tls:
-    - hosts:
-        - ha.darioludwig.space
-      secretName: ha-secret
+   - secretName: ha-secret
+     hosts:
+       - ha.darioludwig.space
 
 resources:
   {}

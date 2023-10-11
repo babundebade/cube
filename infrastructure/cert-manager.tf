@@ -30,7 +30,7 @@ resource "tls_private_key" "cert_key" {
 
 resource "local_sensitive_file" "ca_crt" {
   content  = tls_private_key.cert_key.private_key_pem
-  filename = "/home/dario/cube/certs/ca.crt"
+  filename = pathexpand("~/cube/certs/ca.crt")
 }
 
 resource "tls_self_signed_cert" "cert" {
@@ -53,7 +53,7 @@ resource "tls_self_signed_cert" "cert" {
 
 resource "local_sensitive_file" "x509_ca_crt" {
   content  = tls_self_signed_cert.cert.cert_pem
-  filename = "/home/dario/cube/certs/x509_ca.crt"
+  filename = pathexpand("~/cube/certs/x509_ca.crt")
 
   # lifecycle {
   #   prevent_destroy = true

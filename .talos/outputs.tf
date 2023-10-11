@@ -28,22 +28,32 @@ resource "local_sensitive_file" "kubeconfig_file" {
   filename = "${path.module}/configs/kubeconfig"
 }
 
+resource "local_sensitive_file" "talos_cube_machine_secrets_file" {
+  content  = talos_machine_secrets.talos_cube_secrets.machine_secrets
+  filename = "${path.module}/configs/talos_cube_machine_secrets.yaml"  
+}
+
+resource "local_sensitive_file" "talos_cube_client_secrets_file" {
+  content  = talos_machine_secrets.talos_cube_secrets.client_configuration
+  filename = "${path.module}/configs/talos_cube_client_secrets.yaml"  
+}
+
 resource "local_sensitive_file" "talosconfig_main_file" {
   content  = data.talos_client_configuration.this.talos_config
   filename = pathexpand("~/.talos/config")
 
-  # lifecycle {
-  #   prevent_destroy = true
-  # }
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "local_sensitive_file" "kubeconfig" {
   content  = data.talos_cluster_kubeconfig.this.kubeconfig_raw
   filename = pathexpand("~/.kube/config")
 
-  # lifecycle {
-  #   prevent_destroy = true
-  # }
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "local_sensitive_file" "talos_machine_configuration_cp_file" {
