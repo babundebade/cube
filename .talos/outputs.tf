@@ -1,5 +1,5 @@
 output "talos-secrets" {
-  value = talos_machine_secrets.this.machine_secrets
+  value = talos_machine_secrets.talos_cube_secrets.machine_secrets
   sensitive = true
 }
 
@@ -13,11 +13,6 @@ output "kubeconfig" {
   sensitive = true
 }
 
-# resource "local_sensitive_file" "talos-secrets" {
-#   content = output.talos-secrets.value
-#   filename = "${path.module}/configs/talossecrets.yaml"
-# }
-
 resource "local_sensitive_file" "talosconfig_file" {
   content  = data.talos_client_configuration.this.talos_config
   filename = "${path.module}/configs/talosconfig"
@@ -29,13 +24,13 @@ resource "local_sensitive_file" "kubeconfig_file" {
 }
 
 resource "local_sensitive_file" "talos_cube_machine_secrets_file" {
-  content  = talos_machine_secrets.talos_cube_secrets.machine_secrets
-  filename = "${path.module}/configs/talos_cube_machine_secrets.yaml"  
+  content  = talos_machine_secrets.talos_cube_secrets.client_configuration.ca_certificate
+  filename = "${path.module}/configs/talos_cube_client_ca.crt"  
 }
 
 resource "local_sensitive_file" "talos_cube_client_secrets_file" {
-  content  = talos_machine_secrets.talos_cube_secrets.client_configuration
-  filename = "${path.module}/configs/talos_cube_client_secrets.yaml"  
+  content  = talos_machine_secrets.talos_cube_secrets.machine_secrets.cluster.secret
+  filename = "${path.module}/configs/talos_cube_cluster_secret.yaml"  
 }
 
 resource "local_sensitive_file" "talosconfig_main_file" {
@@ -51,9 +46,9 @@ resource "local_sensitive_file" "kubeconfig" {
   content  = data.talos_cluster_kubeconfig.this.kubeconfig_raw
   filename = pathexpand("~/.kube/config")
 
-  lifecycle {
-    create_before_destroy = true
-  }
+  # lifecycle {
+  #   create_before_destroy = true
+  # }
 }
 
 resource "local_sensitive_file" "talos_machine_configuration_cp_file" {

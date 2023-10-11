@@ -44,7 +44,7 @@ resource "tls_self_signed_cert" "cert" {
   is_ca_certificate = true
   validity_period_hours = 8760
 
-  allowed_uses = ["cert_signing"]
+  allowed_uses = ["cert_signing", "client_auth", "key_encipherment"]
 
   # lifecycle {
   #   prevent_destroy = true
