@@ -1,8 +1,8 @@
+# Run this command after Talos installation to enable system extension for storage
+# talosctl -n 192.168.1.10,192.168.1.11,192.168.1.12 upgrade --image=ghcr.io/siderolabs/installer:v1.5.3 --preserve
+
 resource "talos_machine_secrets" "talos_cube_secrets" {
   talos_version = var.talos_version
-  # lifecycle {
-  #   prevent_destroy = true
-  # }
 }
 
 data "talos_machine_configuration" "controlplane" {
@@ -70,9 +70,6 @@ resource "talos_machine_bootstrap" "this" {
 
   client_configuration = talos_machine_secrets.talos_cube_secrets.client_configuration
   node                 = [for k, v in var.node_data.controlplanes : k][0]
-  # lifecycle {
-  #   prevent_destroy = true
-  # }
 }
 
 data "talos_cluster_kubeconfig" "this" {
