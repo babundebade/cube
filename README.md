@@ -11,9 +11,10 @@ I split the repository into different directories to keep things organized. Each
 The following table provides an overview of the different directories and their contents:
 |Directory|Description|
 |:---|:---|
-|[.talos](.talos)|Contains the Talos configuration files|
-|[infrastructure](infrastructure)|Contains all files to setup infrastructure services such as metallb, ingress-nginx, storage, ...|
-|[apps](apps)|Contains all files to setup applications such as home-assistant, nextcloud, ...|
+|[.01talos](.01talos)|Contains the Talos configuration files|
+|[.02storage](.02storage)|Contains all files to setup the storage services using OpenEBS ...|
+|[.03infrastructure](.03infrastructure)|Contains all files to setup infrastructure services such as metallb, ingress-nginx, cert-manager, ...|
+|[.04apps](.04apps)|Contains all files to setup applications such as pihole, home-assistant, nextcloud, ...|
 |[`rdmassets`](rdmassets)|Contains images and other assets used in the README|
 
 ### My Homelab setup:
