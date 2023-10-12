@@ -1,6 +1,3 @@
-# Run this command after Jiva installation to enable system extension
-# talosctl -e <endpoint ip/hostname> -n <node ip/hostname> upgrade --image=ghcr.io/siderolabs/installer:v1.5.3
-
 resource "kubernetes_namespace" "namespace_openebs" {
   metadata {
     name = "openebs"
@@ -37,7 +34,7 @@ resource "kubernetes_manifest" "openebs_cstor_pool" {
     "apiVersion" = "cstor.openebs.io/v1"
     "kind"       = "CStorPoolCluster"
     "metadata" = {
-      "name"      = "cstor-cspc"
+      "name"      = var.storage_pool_name
       "namespace" = kubernetes_namespace.namespace_openebs.metadata[0].name
     }
     "spec" = {
@@ -74,9 +71,10 @@ resource "kubernetes_manifest" "openebs_cstor_pool" {
 
 resource "kubernetes_storage_class_v1" "cstor_csi_disk" {
   metadata {
-    name = "cstor-csi-disk"
+    name = var.storage_class_name
   }
   storage_provisioner = "cstor.csi.openebs.io"
+  reclaim_policy = "Retain"
   parameters = {
     cas-type = "cstor"
     cstorPoolCluster = "cstor-cspc"

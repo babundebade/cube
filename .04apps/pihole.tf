@@ -11,6 +11,22 @@ resource "null_resource" "kubeconfig_pihole" {
   depends_on = [kubernetes_namespace.pihole_namespace]
 }
 
+resource "kubernetes_persistent_volume_claim_v1" "pihole_pvc" {
+  metadata {
+    name      = "pihole-pvc"
+    namespace = kubernetes_namespace.pihole_namespace.metadata[0].name
+  }
+  spec {
+    storage_class_name = var.storage_class_name
+    access_modes = ["ReadWriteOnce"]
+    resources {
+      requests = {
+        storage = "1Gi"
+      }
+    }
+  }
+}
+
 resource "helm_release" "pihole" {
   name       = "pihole"
   namespace  = kubernetes_namespace.pihole_namespace.metadata[0].name
@@ -20,31 +36,10 @@ resource "helm_release" "pihole" {
   values = [templatefile("${path.module}/services/pihole/values-pihole.yaml", {
     PIHOLE_DNS_IP = var.dns_IPv4
     PIHOLE_WEB_IP = var.ip_pool_start
-    PIHOLE_CNAME  = var.pihole_cname
-    TLD_DOMAIN    = var.tld_domain
+    PIHOLE_CNAME  = var.tld_domain
   })]
 
-  depends_on = [helm_release.ingress_nginx, helm_release.cert-manager]
-}
-
-variable "pihole_cert_name" {
-  type        = string
-  default     = "pihole"
-  description = "name of certificate"
-}
-
-variable "pihole_secret_name" {
-  type        = string
-  default     = "pihole"
-  description = "name of secret"
-}
-
-resource "terraform_data" "pihole_cname" {
-  input = var.pihole_cname
-}
-
-resource "terraform_data" "pihole_secret_name" {
-  input = var.pihole_secret_name
+  depends_on = [kubernetes_namespace.pihole_namespace, kubernetes_persistent_volume_claim_v1.pihole_pvc]
 }
 
 resource "kubernetes_ingress_v1" "pihole_ingress" {
@@ -52,18 +47,18 @@ resource "kubernetes_ingress_v1" "pihole_ingress" {
     name      = "pihole-ingress"
     namespace = kubernetes_namespace.pihole_namespace.metadata[0].name
     annotations = {
-      "cert-manager.io/cluster-issuer" = "cert-issuer"
+      "cert-manager.io/cluster-issuer" = var.cert_issuer_name
     }
   }
 
   spec {
     ingress_class_name = "nginx"
     tls {
-      hosts = [var.pihole_cname]
-      secret_name = terraform_data.pihole_secret_name.input
+      hosts = [var.tld_domain]
+      secret_name = var.pihole_secret_name
     }
     rule {
-      host = var.pihole_cname
+      host = var.tld_domain
       http {
         path {
           path = "/admin"
@@ -79,5 +74,5 @@ resource "kubernetes_ingress_v1" "pihole_ingress" {
       }
     }
   }
-  depends_on = [ helm_release.ingress_nginx, helm_release.cert-manager ]
+  #depends_on = [ helm_release.ingress_nginx, helm_release.cert-manager ]
 }

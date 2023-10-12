@@ -15,14 +15,6 @@ resource "helm_release" "cert-manager" {
   depends_on = [kubernetes_namespace.namespace_cert_manager, helm_release.metallb]
 }
 
-resource "terraform_data" "cert-manager_email" {
-  input = var.email
-}
-
-resource "terraform_data" "cert-manager_name" {
-  input = var.cert_manager_name
-}
-
 resource "tls_private_key" "cert_key" {
   algorithm = "RSA"
   rsa_bits  = 4096
@@ -56,7 +48,7 @@ resource "local_sensitive_file" "x509_ca_crt" {
 
 resource "kubernetes_secret" "root_secret" {
   metadata {
-    name = "root-secret"
+    name = var.root_secret_name
     namespace = resource.kubernetes_namespace.namespace_cert_manager.metadata[0].name
   }
 
@@ -68,7 +60,7 @@ resource "kubernetes_secret" "root_secret" {
 
 resource "k8s_cert_manager_io_cluster_issuer_v1" "root_issuer" {
   metadata = {
-    name      = "root-issuer"
+    name      = var.root_issuer_name
     namespace = resource.kubernetes_namespace.namespace_cert_manager.metadata[0].name
   }
   spec = {
@@ -79,19 +71,19 @@ resource "k8s_cert_manager_io_cluster_issuer_v1" "root_issuer" {
 
 resource "k8s_cert_manager_io_certificate_v1" "root_cert" {
   metadata = {
-    name = "root-ca"
+    name = var.root_cert_name
     namespace = resource.kubernetes_namespace.namespace_cert_manager.metadata[0].name
   }
   spec = {
     is_ca = true
-    common_name = "root-ca"
+    common_name = var.root_cert_name
     secret_name = resource.kubernetes_secret.root_secret.metadata[0].name
     private_key = {
       algorithm = "ECDSA"
       size = 256
     }
     issuer_ref = {
-      name = "root-issuer"
+      name = var.root_issuer_name
       kind = "ClusterIssuer"
       group = "cert-manager.io"
     }
@@ -100,13 +92,13 @@ resource "k8s_cert_manager_io_certificate_v1" "root_cert" {
 
 resource "k8s_cert_manager_io_cluster_issuer_v1" "cert_issuer" {
   metadata = {
-    name = "cert-issuer"
+    name = var.cert_issuer_name
     namespace = resource.kubernetes_namespace.namespace_cert_manager.metadata[0].name
   }
 
   spec = {
     ca = {
-      secret_name = "root_secret"
+      secret_name = var.root_secret_name
     }
   }
 
