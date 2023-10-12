@@ -16,6 +16,7 @@ resource "helm_release" "openebs" {
   repository = "https://openebs.github.io/charts"
   chart      = "openebs"
   namespace  = kubernetes_namespace.namespace_openebs.metadata[0].name
+  version    = "3.9.0"
 
   values = [
     file("${path.module}/services/openebs/values.yaml"),
@@ -50,19 +51,19 @@ resource "kubernetes_manifest" "openebs_cstor_pool" {
         "poolConfig" = {
           "dataRaidGroupType" = "stripe"
         }
-      },
-      {
-        "nodeSelector" = {
-          "kubernetes.io/hostname" = "worker-12"
         },
-        "dataRaidGroups" = [{
-          "blockDevices" = [{
-            "blockDeviceName" = "blockdevice-b557e30f679aa652e8edc52f433a3a49"
-          }]
-        }],
-        "poolConfig" = {
-          "dataRaidGroupType" = "stripe"
-        }
+        {
+          "nodeSelector" = {
+            "kubernetes.io/hostname" = "worker-12"
+          },
+          "dataRaidGroups" = [{
+            "blockDevices" = [{
+              "blockDeviceName" = "blockdevice-b557e30f679aa652e8edc52f433a3a49"
+            }]
+          }],
+          "poolConfig" = {
+            "dataRaidGroupType" = "stripe"
+          }
       }]
     }
   }
@@ -74,12 +75,12 @@ resource "kubernetes_storage_class_v1" "cstor_csi_disk" {
     name = var.storage_class_name
   }
   storage_provisioner = "cstor.csi.openebs.io"
-  reclaim_policy = "Retain"
+  reclaim_policy      = "Retain"
   parameters = {
-    cas-type = "cstor"
+    cas-type         = "cstor"
     cstorPoolCluster = "cstor-cspc"
-    replicaCount = "2"
+    replicaCount     = "2"
   }
   allow_volume_expansion = true
-  depends_on = [kubernetes_manifest.openebs_cstor_pool]
+  depends_on             = [kubernetes_manifest.openebs_cstor_pool]
 }

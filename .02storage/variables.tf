@@ -7,7 +7,7 @@ variable "cluster_name" {
 
 variable "cluster_kubeconfig_path" {
   type        = string
-  default     = pathexpand("~/cube/.talos/configs/kubeconfig")
+  default     = "/home/dario/cube/.01talos/configs/kubeconfig"
   description = "Location of kubeconfig file"
 }
 

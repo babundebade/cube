@@ -21,7 +21,7 @@ resource "kubernetes_persistent_volume_claim_v1" "pihole_pvc" {
     access_modes = ["ReadWriteOnce"]
     resources {
       requests = {
-        storage = "1Gi"
+        storage = "2Gi"
       }
     }
   }
