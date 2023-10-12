@@ -643,12 +643,12 @@ jiva:
   # | - localpv-provisioner(enable)
   # | - openebs-ndm(enable)
 
-  enabled: true
+  enabled: false
   openebsLocalpv:
-    enabled: true
+    enabled: false
   localpv-provisioner:
     openebsNDM:
-      enabled: true
+      enabled: false
 
   # Sample configuration if you want to configure jiva csi driver with custom values.
   # This is a small part of the full configuration. Full configuration available
@@ -713,7 +713,7 @@ cstor:
   # | - cstor(enable)
   # | | - openebs-ndm(disable)
   # | - openebs-ndm(enable)
-  enabled: false
+  enabled: true
   openebsNDM:
     enabled: false
 

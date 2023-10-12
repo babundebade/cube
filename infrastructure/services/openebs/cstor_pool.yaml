@@ -1,0 +1,22 @@
+apiVersion: cstor.openebs.io/v1
+kind: CStorPoolCluster
+metadata:
+ name: cstor-disk-pool
+ namespace: openebs
+spec:
+ pools:
+   - nodeSelector:
+       kubernetes.io/hostname: "worker-11"
+     dataRaidGroups:
+       - blockDevices:
+           - blockDeviceName: "blockdevice-127890b4e51149504156f5a1428d1c49"
+     poolConfig:
+       dataRaidGroupType: "mirror"
+
+   - nodeSelector:
+       kubernetes.io/hostname: "worker-12"
+     dataRaidGroups:
+       - blockDevices:
+           - blockDeviceName: "blockdevice-15cd22f9e67611aafe483422558beb5e"
+     poolConfig:
+       dataRaidGroupType: "mirror"

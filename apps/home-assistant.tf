@@ -14,9 +14,9 @@ resource "null_resource" "kubeconfig_home_assistant" {
 resource "helm_release" "home_assistant" {
   name       = "home-assistant"
   namespace  = "home-assistant"
-  repository = "https://charts.alekc.dev"
+  repository = "https://charts.pree.dev"
   chart      = "home-assistant"
-  #version    = "2023.5.3"
+  version    = "1.29.1"
 
   values     = [file("services/home-assistant/values.yaml")]
   depends_on = [kubernetes_namespace.home_assistant_namespace, null_resource.kubeconfig_home_assistant]
