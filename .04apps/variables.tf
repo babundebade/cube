@@ -90,3 +90,8 @@ variable "storage_class_name" {
   description = "name of standard storage class"
 }
 
+variable "pihole_pvc_name" {
+  type        = string
+  default     = "pihole-pvc"
+  description = "name of pvc"
+}

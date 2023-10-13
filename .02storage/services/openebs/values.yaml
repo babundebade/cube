@@ -93,7 +93,7 @@ provisioner:
 # If you are using custom configuration then update those configuration
 # under `localpv-provisioner` key.
 localprovisioner:
-  enabled: true
+  enabled: false
   image: "openebs/provisioner-localpv"
   imageTag: "3.4.0"
   replicas: 1
@@ -167,7 +167,7 @@ localprovisioner:
     # Name of the default hostpath StorageClass
     name: openebs-hostpath
     # If true, enables creation of the openebs-hostpath StorageClass
-    enabled: true
+    enabled: false
     # Available reclaim policies: Delete/Retain, defaults: Delete.
     reclaimPolicy: Delete
     # If true, sets the openebs-hostpath StorageClass as the default StorageClass
@@ -258,7 +258,7 @@ ndm:
     enableVendorFilter: true
     excludeVendors: "CLOUDBYT,OpenEBS"
     enablePathFilter: true
-    includePaths: ""
+    includePaths: "/dev/sda"
     excludePaths: "/dev/loop,/dev/fd0,/dev/sr0,/dev/ram,/dev/dm-,/dev/md,/dev/rbd,/dev/zd"
   probes:
     enableSeachest: false
@@ -305,7 +305,7 @@ ndmOperator:
     #   memory: 1Gi
 
 ndmExporter:
-  enabled: false
+  enabled: true
   image:
     registry:
     repository: openebs/node-disk-exporter

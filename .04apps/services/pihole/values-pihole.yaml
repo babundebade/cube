@@ -197,13 +197,13 @@ persistentVolumeClaim:
   enabled: true
 
   # -- specify an existing `PersistentVolumeClaim` to use
-  existingClaim: "pihole-pvc"
+  existingClaim: ${PIHOLE_PVC}
 
   # -- Annotations for the `PersitentVolumeClaim`
   annotations: {}
 
-  #accessModes:
-  #  - ReadWriteOnce
+  accessModes:
+   - ReadWriteMany
 
   #size: "500Mi"
 
@@ -213,14 +213,16 @@ persistentVolumeClaim:
   ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
   ##   GKE, AWS & OpenStack)
   ##
-  # storageClass: "-"
+  storageClass: ${STORAGE_CLASS_NAME}
 
   ## If subPath is set mount a sub folder of a volume instead of the root of the volume.
   ## This is especially handy for volume plugins that don't natively support sub mounting (like glusterfs).
 
   ## subPath: "pihole"
 
-nodeSelector: {}
+nodeSelector: {
+  "ssd": "true"
+}
 
 tolerations: []
 

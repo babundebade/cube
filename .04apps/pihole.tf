@@ -18,7 +18,7 @@ resource "kubernetes_persistent_volume_claim_v1" "pihole_pvc" {
   }
   spec {
     storage_class_name = var.storage_class_name
-    access_modes = ["ReadWriteOnce"]
+    access_modes       = ["ReadWriteMany"]
     resources {
       requests = {
         storage = "2Gi"
@@ -37,9 +37,11 @@ resource "helm_release" "pihole" {
     PIHOLE_DNS_IP = var.dns_IPv4
     PIHOLE_WEB_IP = var.ip_pool_start
     PIHOLE_CNAME  = var.tld_domain
+    PIHOLE_PVC    = var.pihole_pvc_name
+    STORAGE_CLASS_NAME = var.storage_class_name
   })]
 
-  depends_on = [kubernetes_namespace.pihole_namespace, kubernetes_persistent_volume_claim_v1.pihole_pvc]
+  depends_on = [kubernetes_namespace.pihole_namespace]
 }
 
 resource "kubernetes_ingress_v1" "pihole_ingress" {
@@ -54,7 +56,7 @@ resource "kubernetes_ingress_v1" "pihole_ingress" {
   spec {
     ingress_class_name = "nginx"
     tls {
-      hosts = [var.tld_domain]
+      hosts       = [var.tld_domain]
       secret_name = var.pihole_secret_name
     }
     rule {

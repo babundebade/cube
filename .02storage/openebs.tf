@@ -45,7 +45,7 @@ resource "kubernetes_manifest" "openebs_cstor_pool" {
         },
         "dataRaidGroups" = [{
           "blockDevices" = [{
-            "blockDeviceName" = "blockdevice-d76e94bfd02ddca6b1ef8938cebc7cdd"
+            "blockDeviceName" = "blockdevice-127890b4e51149504156f5a1428d1c49"
           }]
         }],
         "poolConfig" = {
@@ -58,7 +58,7 @@ resource "kubernetes_manifest" "openebs_cstor_pool" {
           },
           "dataRaidGroups" = [{
             "blockDevices" = [{
-              "blockDeviceName" = "blockdevice-b557e30f679aa652e8edc52f433a3a49"
+              "blockDeviceName" = "blockdevice-15cd22f9e67611aafe483422558beb5e"
             }]
           }],
           "poolConfig" = {
@@ -78,9 +78,10 @@ resource "kubernetes_storage_class_v1" "cstor_csi_disk" {
   reclaim_policy      = "Retain"
   parameters = {
     cas-type         = "cstor"
-    cstorPoolCluster = "cstor-cspc"
+    cstorPoolCluster = var.storage_pool_name
     replicaCount     = "2"
   }
+  volume_binding_mode = "WaitForFirstConsumer"
   allow_volume_expansion = true
   depends_on             = [kubernetes_manifest.openebs_cstor_pool]
 }
