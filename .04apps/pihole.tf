@@ -18,7 +18,7 @@ resource "kubernetes_persistent_volume_claim_v1" "pihole_pvc" {
   }
   spec {
     storage_class_name = var.storage_class_name
-    access_modes       = ["ReadWriteMany"]
+    access_modes       = ["ReadWriteOnce"]
     resources {
       requests = {
         storage = "2Gi"

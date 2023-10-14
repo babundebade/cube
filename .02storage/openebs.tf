@@ -70,9 +70,45 @@ resource "kubernetes_manifest" "openebs_cstor_pool" {
   depends_on = [helm_release.openebs]
 }
 
+resource "null_resource" "openebs_csi_iscsiadm" {
+  provisioner "local-exec" {
+    command = "kubectl --namespace openebs apply --filename services/openebs/configmap.yaml"
+  }
+  depends_on = [helm_release.openebs]
+}
+
+resource "null_resource" "openebs_daemonset_patch" {
+  provisioner "local-exec" {
+    command = "kubectl --namespace openebs patch daemonset openebs-cstor-csi-node --type=json --patch-file services/openebs/daemonset_patch.json"
+  }
+  depends_on = [helm_release.openebs, null_resource.openebs_csi_iscsiadm]
+}
+
+# resource "kubernetes_manifest" "openebs_cstor_csi_node_patch" {
+#   manifest = {
+#     "apiVersion" = "apps/v1"
+#     "kind"       = "DaemonSet"
+#     "metadata" = {
+#       "name"      = "openebs-cstor-csi-node"
+#       "namespace" = kubernetes_namespace.namespace_openebs.metadata[0].name
+#     }
+#     "spec" = {
+#       "template" = {
+#         "spec" = {
+#           "hostPID" = true
+#         }
+#       }
+#     }
+#   }
+#   depends_on = [helm_release.openebs, null_resource.openebs_csi_iscsiadm]
+# }
+
 resource "kubernetes_storage_class_v1" "cstor_csi_disk" {
   metadata {
     name = var.storage_class_name
+    annotations = {
+      "storageclass.kubernetes.io/is-default-class" = "true"
+    }
   }
   storage_provisioner = "cstor.csi.openebs.io"
   reclaim_policy      = "Retain"
@@ -81,7 +117,7 @@ resource "kubernetes_storage_class_v1" "cstor_csi_disk" {
     cstorPoolCluster = var.storage_pool_name
     replicaCount     = "2"
   }
-  volume_binding_mode = "WaitForFirstConsumer"
+  volume_binding_mode    = "WaitForFirstConsumer"
   allow_volume_expansion = true
   depends_on             = [kubernetes_manifest.openebs_cstor_pool]
 }
