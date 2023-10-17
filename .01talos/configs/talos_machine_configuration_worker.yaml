@@ -166,7 +166,7 @@ machine:
         image: ghcr.io/siderolabs/installer:v1.5.3 # Allows for supplying the image used to perform the installation.
         # Allows for supplying additional system extension images to install on top of base Talos image.
         extensions:
-            - image: ghcr.io/siderolabs/iscsi-tools:v0.1.1 # System extension image.
+            - image: ghcr.io/siderolabs/iscsi-tools:v0.1.1@sha256:4703548e4adbb185c64c210679c9a75a639713d3ed5958f833a87978cf9efed2 # System extension image.
         wipe: false # Indicates if the installation disk should be wiped at installation time.
         
         # # Look up disk using disk attributes like model, size, serial and others.

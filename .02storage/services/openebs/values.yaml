@@ -245,7 +245,7 @@ snapshotOperator:
 # `ndmOperator.enabled: false` and enable it as dependency chart. If you are using
 # custom configuration then update those configuration under `openebs-ndm` key.
 ndm:
-  enabled: true
+  enabled: false
   image: "openebs/node-disk-manager"
   imageTag: "2.1.0"
   sparse:
@@ -281,7 +281,7 @@ ndm:
 # `ndmOperator.enabled: false` and enable it as dependency chart. If you are using
 # custom configuration then update those configuration under `openebs-ndm` key.
 ndmOperator:
-  enabled: true
+  enabled: false
   image: "openebs/node-disk-operator"
   imageTag: "2.1.0"
   replicas: 1
@@ -305,7 +305,7 @@ ndmOperator:
     #   memory: 1Gi
 
 ndmExporter:
-  enabled: true
+  enabled: false
   image:
     registry:
     repository: openebs/node-disk-exporter
@@ -363,7 +363,7 @@ helper:
 # dependency chart. If you are using custom configuration then update those configuration
 # under `openebs-ndm` key.
 featureGates:
-  enabled: true
+  enabled: false
   GPTBasedUUID:
     enabled: true
     featureGateFlag: "GPTBasedUUID"
@@ -621,7 +621,7 @@ jiva:
   # non csi configuration
   image: "openebs/jiva"
   imageTag: "2.12.2"
-  replicas: 3
+  replicas: 2
   defaultStoragePath: "/var/openebs"
 
   # jiva csi driver configuration
@@ -643,7 +643,7 @@ jiva:
   # | - localpv-provisioner(enable)
   # | - openebs-ndm(enable)
 
-  enabled: false
+  enabled: true
   openebsLocalpv:
     enabled: false
   localpv-provisioner:
@@ -713,7 +713,7 @@ cstor:
   # | - cstor(enable)
   # | | - openebs-ndm(disable)
   # | - openebs-ndm(enable)
-  enabled: true
+  enabled: false
   openebsNDM:
     enabled: false
 
@@ -789,7 +789,7 @@ cstor:
 # ndm configuration goes here
 # https://openebs.github.io/node-disk-manager
 openebs-ndm:
-  enabled: false
+  enabled: true
 
   # Sample configuration if you want to configure openebs ndm with custom values.
   # This is a small part of the full configuration. Full configuration available
@@ -867,7 +867,7 @@ openebs-ndm:
   # | | - openebs-ndm(disable)
   # | - openebs-ndm(enable)
 localpv-provisioner:
-  enabled: false
+  enabled: true
   openebsNDM:
     enabled: false
 

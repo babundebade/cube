@@ -17,7 +17,7 @@ resource "kubernetes_persistent_volume_claim_v1" "pihole_pvc" {
     namespace = kubernetes_namespace.pihole_namespace.metadata[0].name
   }
   spec {
-    storage_class_name = var.storage_class_name
+    storage_class_name = "openebs-jiva-csi-default" #var.storage_class_name
     access_modes       = ["ReadWriteOnce"]
     resources {
       requests = {
