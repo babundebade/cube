@@ -3,9 +3,10 @@ cluster:
 
 machine:
   install:
-    image: ghcr.io/siderolabs/installer:v1.5.3
+    image: factory.talos.dev/installer/f92e847a1ff11710a6f0ad3c2794b555cfb1d0c42345b49db29617c18e54c30f:v1.5.5
     extensions:
-      - image: ghcr.io/siderolabs/iscsi-tools:v0.1.1@sha256:4703548e4adbb185c64c210679c9a75a639713d3ed5958f833a87978cf9efed2
+      - image: ghcr.io/siderolabs/iscsi-tools:v0.1.4@sha256:68b34a2e37ed34607e81beb2475355039da14996d8d1c6dc36a9f262d5db17f8
+      - image: ghcr.io/siderolabs/usb-modem-drivers:v1.6.0-alpha.2-3-g9105eef@sha256:e1b08a112ea8859d2868cd2f32a99c9bb53a327bcf91b88800be64ff74c8e373
 
   kubelet:
     extraMounts:

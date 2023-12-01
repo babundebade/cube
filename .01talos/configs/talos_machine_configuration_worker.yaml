@@ -163,10 +163,11 @@ machine:
     # Used to provide instructions for installations.
     install:
         disk: /dev/sda # The disk used for installations.
-        image: ghcr.io/siderolabs/installer:v1.5.3 # Allows for supplying the image used to perform the installation.
+        image: factory.talos.dev/installer/f92e847a1ff11710a6f0ad3c2794b555cfb1d0c42345b49db29617c18e54c30f:v1.5.5 # Allows for supplying the image used to perform the installation.
         # Allows for supplying additional system extension images to install on top of base Talos image.
         extensions:
-            - image: ghcr.io/siderolabs/iscsi-tools:v0.1.1@sha256:4703548e4adbb185c64c210679c9a75a639713d3ed5958f833a87978cf9efed2 # System extension image.
+            - image: ghcr.io/siderolabs/iscsi-tools:v0.1.4@sha256:68b34a2e37ed34607e81beb2475355039da14996d8d1c6dc36a9f262d5db17f8 # System extension image.
+            - image: ghcr.io/siderolabs/usb-modem-drivers:v1.6.0-alpha.2-3-g9105eef@sha256:e1b08a112ea8859d2868cd2f32a99c9bb53a327bcf91b88800be64ff74c8e373 # System extension image.
         wipe: false # Indicates if the installation disk should be wiped at installation time.
         
         # # Look up disk using disk attributes like model, size, serial and others.
@@ -405,6 +406,7 @@ cluster:
             service: {}
             # # External service endpoint.
             # endpoint: https://discovery.talos.dev/
+    allowSchedulingOnControlPlanes: true # Allows running workload on control-plane nodes.
     
     # # A key used for the [encryption of secret data at rest](https://kubernetes.io/docs/tasks/administer-cluster/encrypt-data/).
 
@@ -537,6 +539,3 @@ cluster:
     # # Settings for admin kubeconfig generation.
     # adminKubeconfig:
     #     certLifetime: 1h0m0s # Admin kubeconfig certificate lifetime (default is 1 year).
-
-    # # Allows running workload on control-plane nodes.
-    # allowSchedulingOnControlPlanes: true
