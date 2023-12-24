@@ -5,11 +5,11 @@ variable "cluster_name" {
   default     = "talos-cube"
 }
 
-variable "cluster_kubeconfig_path" {
-  type        = string
-  default     = pathexpand("~/cube/.talos/configs/kubeconfig")
-  description = "Location of kubeconfig file"
-}
+# variable "cluster_kubeconfig_path" {
+#   type        = string
+#   default     = pathexpand("~/cube/.talos/configs/kubeconfig")
+#   description = "Location of kubeconfig file"
+# }
 
 # Network and Domain name variables
 variable "dns_IPv4" {

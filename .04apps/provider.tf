@@ -2,25 +2,31 @@ terraform {
   required_providers {
     kubernetes = {
       source  = "hashicorp/kubernetes"
-      version = "2.23.0"
+      version = "2.24.0"
       # https://registry.terraform.io/providers/hashicorp/kubernetes/latest
     }
 
     helm = {
       source  = "hashicorp/helm"
-      version = "2.11.0"
+      version = "2.12.1"
       # https://registry.terraform.io/providers/hashicorp/helm/latest
     }
 
     tls = {
       source  = "hashicorp/tls"
-      version = "4.0.4"
+      version = "4.0.5"
     }
 
     mikrotik = {
       source  = "kube-cloud/mikrotik"
       version = "0.13.0"
       # https://registry.terraform.io/providers/kube-cloud/mikrotik/latest
+    }
+
+    k8s = {
+      source = "metio/k8s"
+      version = "2023.9.4"
+      # https://registry.terraform.io/providers/metio/k8s/latest/docs
     }
   }
 }
@@ -37,3 +43,5 @@ provider "helm" {
 }
 
 provider "tls" {}
+
+provider "k8s" {}

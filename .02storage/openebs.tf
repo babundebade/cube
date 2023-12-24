@@ -18,7 +18,7 @@ resource "helm_release" "openebs" {
   namespace  = kubernetes_namespace.namespace_openebs.metadata[0].name
 
   values = [
-    file("${path.module}/services/openebs/values.yaml"),
+    file("${path.module}/openebs/values.yaml"),
   ]
   depends_on = [kubernetes_namespace.namespace_openebs, null_resource.kubeconfig_openebs]
 }

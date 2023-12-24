@@ -1,3 +1,0 @@
-docker run --rm -t -v $PWD/_out:/out ghcr.io/siderolabs/imager:v1.5.3 metal-arm64.iso --arch arm64 --system-extension-image ghcr.io/siderolabs/iscsi-tools:v0.1.4
-
-make image-metal IMAGER_SYSTEM_EXTENSIONS="ghcr.io/siderolabs/iscsi-tools:v0.1.4"

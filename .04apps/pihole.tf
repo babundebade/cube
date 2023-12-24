@@ -11,21 +11,21 @@ resource "null_resource" "kubeconfig_pihole" {
   depends_on = [kubernetes_namespace.pihole_namespace]
 }
 
-resource "kubernetes_persistent_volume_claim_v1" "pihole_pvc" {
-  metadata {
-    name      = "pihole-pvc"
-    namespace = kubernetes_namespace.pihole_namespace.metadata[0].name
-  }
-  spec {
-    storage_class_name = var.storage_class_name
-    access_modes = ["ReadWriteOnce"]
-    resources {
-      requests = {
-        storage = "1Gi"
-      }
-    }
-  }
-}
+# resource "kubernetes_persistent_volume_claim_v1" "pihole_pvc" {
+#   metadata {
+#     name      = "pihole-pvc"
+#     namespace = kubernetes_namespace.pihole_namespace.metadata[0].name
+#   }
+#   spec {
+#     storage_class_name = var.storage_class_name
+#     access_modes = ["ReadWriteOnce"]
+#     resources {
+#       requests = {
+#         storage = "1Gi"
+#       }
+#     }
+#   }
+# }
 
 resource "helm_release" "pihole" {
   name       = "pihole"
@@ -39,7 +39,7 @@ resource "helm_release" "pihole" {
     PIHOLE_CNAME  = var.tld_domain
   })]
 
-  depends_on = [kubernetes_namespace.pihole_namespace, kubernetes_persistent_volume_claim_v1.pihole_pvc]
+  depends_on = [kubernetes_namespace.pihole_namespace]
 }
 
 resource "kubernetes_ingress_v1" "pihole_ingress" {
