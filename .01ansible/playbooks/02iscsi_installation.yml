@@ -1,0 +1,42 @@
+---
+- name: Verify and Install iSCSI Services
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Check if iSCSI initiator is installed
+      ansible.builtin.stat:
+        path: /etc/iscsi/initiatorname.iscsi
+      register: initiator
+
+    - name: Check iSCSI service status
+      ansible.builtin.service:
+        name: iscsid
+        state: started
+      register: service_status
+      when: initiator.stat.exists
+
+    - name: Enable and start iscsid service if not running
+      ansible.builtin.systemd:
+        name: iscsid
+        enabled: yes
+        state: started
+      when: service_status.status is defined and service_status.status != "running"
+
+    - name: Install iSCSI tools if not installed
+      when: not initiator.stat.exists
+      block:
+        - name: Update apt package index
+          ansible.builtin.apt:
+            update_cache: yes
+
+        - name: Install open-iscsi package
+          ansible.builtin.apt:
+            name: open-iscsi
+            state: latest
+
+        - name: Enable and start iscsid service
+          ansible.builtin.systemd:
+            name: iscsid
+            enabled: yes
+            state: started

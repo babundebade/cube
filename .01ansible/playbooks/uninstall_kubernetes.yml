@@ -1,0 +1,217 @@
+---
+- name: Uninstall Kubernetes from Worker Nodes
+  hosts: workers
+  become: yes
+
+  tasks:
+    - name: Check if apt lock is available on workers
+      ansible.builtin.command: fuser /var/lib/dpkg/lock-frontend
+      register: fuser_check
+      failed_when: fuser_check.rc == 0
+      changed_when: false
+      retries: 1
+      delay: 30
+      until: fuser_check.failed
+
+    - name: Unhold Kubernetes packages on workers
+      apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: yes
+      loop:
+        - kubelet
+        - kubeadm
+        - kubectl
+
+    - name: Check for kubelet installation on workers
+      command: which kubelet
+      register: kubelet_check
+      ignore_errors: yes
+
+    - name: Stop kubelet on workers
+      systemd:
+        name: kubelet
+        state: stopped
+        enabled: no
+      when: kubelet_check.rc == 0
+
+    - name: Check for kubeadm installation on workers
+      command: which kubeadm
+      register: kubeadm_check
+      ignore_errors: yes
+
+    - name: Check for port 6443 usage on workers
+      shell: ss -tulwn | grep :6443
+      register: port_check
+      ignore_errors: yes
+
+    - name: Cleanup if port 6443 is in use on workers
+      block:
+        - name: Stop services that may use port 6443
+          systemd:
+            name: "{{ item }}"
+            state: stopped
+          loop:
+            - kubelet
+            - docker
+            - containerd
+          when: port_check.stdout != ''
+          ignore_errors: yes
+
+        - name: Kill any processes using port 6443
+          shell: kill -9 $(lsof -t -i:6443) || true
+          when: port_check.stdout != ''
+
+        - name: Run kubeadm reset
+          command: kubeadm reset -f
+          when: port_check.stdout != ''
+          
+        - name: Flush iptables
+          command: "{{ item }}"
+          loop:
+            - iptables -F
+            - iptables -X
+          when: port_check.stdout != ''
+
+    - name: Reset kubeadm on workers
+      command: kubeadm reset -f
+      when: kubeadm_check.rc == 0 and port_check.stdout == ''
+
+    - name: Remove Kubernetes related network interfaces from workers
+      shell: |
+        ip link delete cni0
+        ip link delete flannel.1
+      ignore_errors: yes
+
+    - name: Uninstall Kubernetes packages from workers
+      apt:
+        name: "{{ item }}"
+        state: absent
+        purge: yes
+        force: yes
+      loop:
+        - kubeadm
+        - kubelet
+        - kubectl
+      when: kubeadm_check.rc == 0 or kubelet_check.rc == 0
+
+    - name: Remove Kubernetes directories from workers
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /etc/kubernetes/
+        - /var/lib/etcd/
+        - /var/lib/kubelet/
+        - /var/lib/dockershim/
+        - /var/run/kubernetes/
+        - /var/lib/cni/
+
+- name: Uninstall Kubernetes from Control Plane Node
+  hosts: controlplanes
+  become: yes
+  serial: 1  # Ensures the playbook runs on one node at a time
+
+  tasks:
+    - name: Check if apt lock is available on control plane
+      ansible.builtin.command: fuser /var/lib/dpkg/lock-frontend
+      register: fuser_check
+      failed_when: fuser_check.rc == 0
+      changed_when: false
+      retries: 1
+      delay: 30
+      until: fuser_check.failed
+
+    - name: Unhold Kubernetes packages on control plane
+      apt:
+        name: "{{ item }}"
+        state: present
+        update_cache: yes
+      loop:
+        - kubelet
+        - kubeadm
+        - kubectl
+
+    - name: Check for kubelet installation on control plane
+      command: which kubelet
+      register: kubelet_check
+      ignore_errors: yes
+
+    - name: Stop kubelet on control plane
+      systemd:
+        name: kubelet
+        state: stopped
+        enabled: no
+      when: kubelet_check.rc == 0
+
+    - name: Check for kubeadm installation on control plane
+      command: which kubeadm
+      register: kubeadm_check
+      ignore_errors: yes
+
+    - name: Check for port 6443 usage on control plane
+      shell: ss -tulwn | grep :6443
+      register: port_check
+      ignore_errors: yes
+
+    - name: Cleanup if port 6443 is in use on control plane
+      block:
+        - name: Stop services that may use port 6443
+          systemd:
+            name: "{{ item }}"
+            state: stopped
+          loop:
+            - kubelet
+            - docker
+            - containerd
+          when: port_check.stdout != ''
+          ignore_errors: yes
+
+        - name: Kill any processes using port 6443
+          shell: kill -9 $(lsof -t -i:6443) || true
+          when: port_check.stdout != ''
+
+        - name: Run kubeadm reset
+          command: kubeadm reset -f
+          when: port_check.stdout != ''
+          
+        - name: Flush iptables
+          command: "{{ item }}"
+          loop:
+            - iptables -F
+            - iptables -X
+          when: port_check.stdout != ''
+
+    - name: Reset kubeadm on control plane
+      command: kubeadm reset -f
+      when: kubeadm_check.rc == 0 and port_check.stdout == ''
+
+    - name: Remove Kubernetes related network interfaces from control plane
+      shell: |
+        ip link delete cni0
+        ip link delete flannel.1
+      ignore_errors: yes
+
+    - name: Uninstall Kubernetes packages from control plane
+      apt:
+        name: "{{ item }}"
+        state: absent
+        purge: yes
+        force: yes
+      loop:
+        - kubeadm
+        - kubelet
+        - kubectl
+      when: kubeadm_check.rc == 0 or kubelet_check.rc == 0
+
+    - name: Remove Kubernetes directories from control plane
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /etc/kubernetes/
+        - /var/lib/etcd/
+        - /var/lib/kubelet/
+        - /var/lib/dockershim/
+        - /var/run/kubernetes/
+        - /var/lib/cni/

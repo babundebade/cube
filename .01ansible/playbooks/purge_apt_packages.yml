@@ -1,0 +1,12 @@
+---
+- name: Run apt-get purge --auto-remove on Ubuntu Servers
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Remove unnecessary packages with apt-get purge --auto-remove
+      ansible.builtin.apt:
+        purge: yes
+        autoremove: yes
+        state: absent
+      when: ansible_distribution == 'Ubuntu'

@@ -1,0 +1,9 @@
+---
+- name: Shutdown Raspberry Pi Machines
+  hosts: controlplanes:workers
+  become: yes
+
+  tasks:
+    - name: Shutdown Raspberry Pi
+      ansible.builtin.command:
+        cmd: shutdown now

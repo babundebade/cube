@@ -1,0 +1,19 @@
+---
+- name: Get Temperature of Hosts
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Install lm-sensors
+      ansible.builtin.apt:
+        name: lm-sensors
+        state: present
+      when: ansible_facts['os_family'] == "Debian"
+
+    - name: Run sensors command
+      ansible.builtin.command: sensors
+      register: result
+
+    - name: Print temperature details
+      ansible.builtin.debug:
+        var: result.stdout_lines

@@ -1,0 +1,148 @@
+---
+- name: Prepare Kubernetes Nodes
+  hosts: controlplanes:workers
+  become: yes
+
+  tasks:
+    - name: Load necessary kernel modules
+      modprobe:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - br_netfilter
+        - overlay
+
+    - name: Update apt package index
+      apt:
+        update_cache: yes
+
+    - name: Install necessary packages
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - software-properties-common
+        - containerd
+        - kubelet
+        - kubeadm
+        - kubectl
+
+    - name: Add Kubernetes signing key and repository
+      block:
+        - ansible.builtin.apt_key:
+            url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+            state: present
+        - apt_repository:
+            repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+            state: present
+
+    - name: Configure containerd for Kubernetes
+      block:
+        - name: Create containerd configuration directory
+          file:
+            path: /etc/containerd
+            state: directory
+        - name: Generate and modify containerd configuration for Kubernetes
+          shell: containerd config default | sed -e 's/SystemdCgroup = false/SystemdCgroup = true/' > /etc/containerd/config.toml
+        - name: Restart containerd
+          systemd:
+            name: containerd
+            state: restarted
+            daemon_reload: yes
+
+    - name: Disable swap if enabled and hold Kubernetes packages
+      block:
+        - command: swapoff -a
+          when: ansible_swaptotal_mb > 0
+        - lineinfile:
+            path: /etc/fstab
+            regexp: '^\s*[^#]\s*swap\s'
+            line: "# Commented out by Ansible"
+            state: present
+        - ansible.builtin.dpkg_selections:
+            name: "{{ item }}"
+            selection: hold
+          loop:
+            - kubelet
+            - kubeadm
+            - kubectl
+
+    - name: Ensure net.bridge.bridge-nf-call-iptables is set to 1
+      sysctl:
+        name: net.bridge.bridge-nf-call-iptables
+        value: '1'
+        state: present
+        reload: yes
+
+- name: Initialize Kubernetes Master
+  hosts: controlplanes
+  become: yes
+
+  tasks:
+    - name: Remove existing Kubernetes admin.conf
+      file:
+        path: /etc/kubernetes/admin.conf
+        state: absent
+
+    - name: Initialize the Kubernetes cluster
+      command: kubeadm init --pod-network-cidr=10.0.0.0/16
+
+    - name: Setup kubeconfig for local user
+      block:
+        - name: Ensure .kube directory exists for local user
+          file:
+            path: "/home/dario/.kube"
+            state: directory
+            mode: '0755'
+            owner: dario
+            group: dario
+        - name: Copy new admin.conf to user's kube config
+          copy:
+            src: /etc/kubernetes/admin.conf
+            dest: "/home/dario/.kube/config"
+            remote_src: yes
+            owner: dario
+            group: dario
+
+- name: Install Calico network plugin
+  hosts: controlplanes
+  become: yes
+  tasks:
+    - name: Apply Calico Network Plugin
+      command: kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+      environment:
+        KUBECONFIG: "/home/dario/.kube/config"
+
+- name: Get join command
+  hosts: controlplanes
+  become: yes
+  tasks:
+    - name: Create token and get join command with verbosity and extended timeout
+      shell: timeout 180 kubeadm token create --print-join-command --v=5
+      register: join_command
+      environment:
+        KUBECONFIG: "/home/dario/.kube/config"
+    - set_fact:
+        k8s_join_command: "{{ join_command.stdout }}"
+
+- name: Join Kubernetes Workers
+  hosts: workers
+  become: yes
+  tasks:
+    - name: Join cluster
+      shell: "{{ hostvars['192.168.1.10'].k8s_join_command }}"
+      environment:
+        KUBECONFIG: "/home/dario/.kube/config"
+    - name: Verify successful join
+      shell: kubectl get nodes --kubeconfig /home/dario/.kube/config
+      delegate_to: "192.168.1.10"
+      retries: 3
+      delay: 10
+      register: node_check
+      until: inventory_hostname in node_check.stdout and 'Ready' in node_check.stdout
+      failed_when: node_check.rc != 0
+      environment:
+        KUBECONFIG: "/home/dario/.kube/config"
