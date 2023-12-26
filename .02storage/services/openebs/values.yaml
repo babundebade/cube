@@ -93,7 +93,7 @@ provisioner:
 # If you are using custom configuration then update those configuration
 # under `localpv-provisioner` key.
 localprovisioner:
-  enabled: false
+  enabled: true
   image: "openebs/provisioner-localpv"
   imageTag: "3.5.0"
   replicas: 1
