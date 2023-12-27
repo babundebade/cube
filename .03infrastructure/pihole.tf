@@ -11,27 +11,27 @@ resource "null_resource" "kubeconfig_pihole" {
   depends_on = [kubernetes_namespace.pihole_namespace]
 }
 
-# resource "kubernetes_persistent_volume_claim_v1" "pihole_pvc" {
-#   metadata {
-#     name      = "pihole-pvc"
-#     namespace = kubernetes_namespace.pihole_namespace.metadata[0].name
-#   }
-#   spec {
-#     storage_class_name = var.storage_class_name
-#     access_modes = ["ReadWriteOnce"]
-#     resources {
-#       requests = {
-#         storage = "1Gi"
-#       }
-#     }
-#   }
-# }
+resource "kubernetes_persistent_volume_claim_v1" "pihole_pvc" {
+  metadata {
+    name      = "pihole-pvc"
+    namespace = kubernetes_namespace.pihole_namespace.metadata[0].name
+  }
+  spec {
+    storage_class_name = var.storage_class_name
+    access_modes = ["ReadWriteOnce"]
+    resources {
+      requests = {
+        storage = "2Gi"
+      }
+    }
+  }
+}
 
 resource "helm_release" "pihole" {
   name       = "pihole"
   namespace  = kubernetes_namespace.pihole_namespace.metadata[0].name
   repository = "https://mojo2600.github.io/pihole-kubernetes/"
-  chart      = "pihole" #mojo2600/pihole
+  chart      = "mojo2600/pihole" #mojo2600/pihole
 
   values = [templatefile("${path.module}/services/pihole/values-pihole.yaml", {
     PIHOLE_DNS_IP = var.dns_IPv4

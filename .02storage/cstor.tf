@@ -133,16 +133,20 @@ resource "kubernetes_manifest" "openebs_cstor_pool" {
 }
 
 resource "kubernetes_storage_class_v1" "cstor_csi_disk" {
-  metadata {
-    name = var.storage_class_name
-  }
-  storage_provisioner = "cstor.csi.openebs.io"
-  reclaim_policy = "Retain"
-  parameters = {
-    cas-type = "cstor"
-    cstorPoolCluster = var.storage_pool_name
-    replicaCount = "1"
-  }
-  allow_volume_expansion = true
-  depends_on = [kubernetes_manifest.openebs_cstor_pool]
+    metadata {
+      name = var.storage_class_name
+      annotations = {
+        "storageclass.kubernetes.io/is-default-class" = "true"
+      }
+    }
+    storage_provisioner = "cstor.csi.openebs.io"
+    reclaim_policy = "Retain"
+    parameters = {
+      cas-type = "cstor"
+      cstorPoolCluster = var.storage_pool_name
+      replicaCount = "1"
+    }
+    allow_volume_expansion = false
+    volume_binding_mode = "WaitForFirstConsumer"
+    depends_on = [kubernetes_manifest.openebs_cstor_pool]
 }
