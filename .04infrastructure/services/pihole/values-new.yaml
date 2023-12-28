@@ -9,7 +9,7 @@ replicaCount: 1
 strategyType: RollingUpdate
 
 # -- The maximum number of Pods that can be created over the desired number of `ReplicaSet` during updating.
-maxSurge: 2
+maxSurge: 1
 
 # -- The maximum number of Pods that can be unavailable during updating
 maxUnavailable: 1
@@ -18,7 +18,7 @@ image:
   # -- the repostory to pull the image from
   repository: "pihole/pihole"
   # -- the docker tag, if left empty it will get it from the chart's appVersion
-  tag: "latest"
+  tag: ""
   # -- the pull policy
   pullPolicy: IfNotPresent
 
@@ -28,18 +28,17 @@ dualStack:
 
 dnsHostPort:
   # -- set this to true to enable dnsHostPort
-  enabled: false #default true
+  enabled: false
   # -- default port for this pod
   port: 53
 
 # -- Configuration for the DNS service on port 53
 serviceDns:
-
   # -- deploys a mixed (TCP + UDP) Service instead of separate ones
-  mixedService: true
+  mixedService: false
 
   # -- `spec.type` for the DNS Service
-  #type: NodePort
+  type: NodePort
 
   # -- The port of the DNS service
   port: 53
@@ -51,25 +50,19 @@ serviceDns:
   externalTrafficPolicy: Local
 
   # -- A fixed `spec.loadBalancerIP` for the DNS Service
-  loadBalancerIP: ${PIHOLE_DNS_IP}
-  annotations:
-    metallb.universe.tf/address-pool: pihole-pool
-    metallb.universe.tf/allow-shared-ip: pihole-pool
-
-  type: LoadBalancer
+  loadBalancerIP: ""
   # -- A fixed `spec.loadBalancerIP` for the IPv6 DNS Service
   loadBalancerIPv6: ""
 
   # -- Annotations for the DNS service
-  #annotations: {}
+  annotations: {}
   # metallb.universe.tf/address-pool: network-services
   # metallb.universe.tf/allow-shared-ip: pihole-svc
 
 # -- Configuration for the DHCP service on port 67
 serviceDhcp:
-
   # -- Generate a Service resource for DHCP traffic
-  enabled: false
+  enabled: true
 
   # -- `spec.type` for the DHCP Service
   type: NodePort
@@ -97,7 +90,6 @@ serviceDhcp:
 serviceWeb:
   # -- Configuration for the HTTP web interface listener
   http:
-
     # -- Generate a service for HTTP traffic
     enabled: true
 
@@ -119,52 +111,56 @@ serviceWeb:
     nodePort: ""
 
   # -- `spec.type` for the web interface Service
-  type: #LoadBalancer
+  type: ClusterIP
 
   # -- `spec.externalTrafficPolicy` for the web interface Service
-  externalTrafficPolicy: Local #default Cluster
+  externalTrafficPolicy: Local
 
   # -- A fixed `spec.loadBalancerIP` for the web interface Service
   loadBalancerIP: ""
-  annotations:
-  #metallb.universe.tf/address-pool: pihole-pool
-  #metallb.universe.tf/allow-shared-ip: pihole-pool
   # -- A fixed `spec.loadBalancerIP` for the IPv6 web interface Service
   loadBalancerIPv6: ""
 
   # -- Annotations for the DHCP service
-  #annotations: {}
+  annotations: {}
   # metallb.universe.tf/address-pool: network-services
   # metallb.universe.tf/allow-shared-ip: pihole-svc
 
-virtualHost: pihole.local
+virtualHost: pi.hole
 
 # -- Configuration for the Ingress
 ingress:
   # -- Generate a Ingress resource
-  enabled: false #default false
+  enabled: false
 
   # -- Specify an ingressClassName
-  ingressClassName: nginx
+  # ingressClassName: nginx
 
   # -- Annotations for the ingress
-  annotations:
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  path: /admin
+  annotations: {}
+  # kubernetes.io/ingress.class: nginx
+  # kubernetes.io/tls-acme: "true"
+  path: /
   hosts:
   # virtualHost (default value is pi.hole) will be appended to the hosts
-  tls:
-  - secretName: pihole-tls
-    hosts:
-    #- virtualHost (default value is pi.hole) will be appended to the hosts
+  - chart-example.local
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #     #- virtualHost (default value is pi.hole) will be appended to the hosts
+  #      - chart-example.local
 
 # -- Probes configuration
 probes:
   # -- probes.liveness -- Configure the healthcheck for the ingress controller
   liveness:
     # -- Generate a liveness probe
+    # 'type' defaults to httpGet, can be set to 'command' to use a command type liveness probe.
+    type: httpGet
+    # command:
+    #   - /bin/bash
+    #   - -c
+    #   - /bin/true
     enabled: true
     initialDelaySeconds: 60
     failureThreshold: 10
@@ -198,15 +194,15 @@ persistentVolumeClaim:
   enabled: false
 
   # -- specify an existing `PersistentVolumeClaim` to use
-  existingClaim: "pihole-pvc"
+  # existingClaim: ""
 
   # -- Annotations for the `PersitentVolumeClaim`
   annotations: {}
 
-  #accessModes:
-  #  - ReadWriteOnce
+  accessModes:
+  - ReadWriteOnce
 
-  #size: "500Mi"
+  size: "500Mi"
 
   ## If defined, storageClassName: <storageClass>
   ## If set to "-", storageClassName: "", which disables dynamic provisioning
@@ -241,15 +237,15 @@ affinity: {}
 adminPassword: "admin"
 
 # -- Use an existing secret for the admin password.
-#admin:
-# -- Specify an existing secret to use as admin password
-#existingSecret: ""
-# -- Specify the key inside the secret to use
-#passwordKey: "password"
+admin:
+  # -- Specify an existing secret to use as admin password
+  existingSecret: ""
+  # -- Specify the key inside the secret to use
+  passwordKey: "password"
 
 # -- extraEnvironmentVars is a list of extra enviroment variables to set for pihole to use
-extraEnvVars: #{}
-  TZ: Berlin/Europe
+extraEnvVars: {}
+# TZ: UTC
 
 # -- extraEnvVarsSecret is a list of secrets to load in as environment variables.
 extraEnvVarsSecret: {}
@@ -258,9 +254,9 @@ extraEnvVarsSecret: {}
 #   key: secret-key
 
 # -- default upstream DNS 1 server to use
-DNS1: "84.200.69.80"
+DNS1: "8.8.8.8"
 # -- default upstream DNS 2 server to use
-DNS2: "89.233.43.71"
+DNS2: "8.8.4.4"
 
 antiaff:
   # -- set to true to enable antiaffinity (example: 2 pihole DNS in the same cluster)
@@ -270,6 +266,8 @@ antiaff:
   avoidRelease: pihole1
   # -- Here you can choose between preferred or required
   strict: true
+  # -- Here you can pass namespaces to be part of those inclueded in anti-affinity
+  namespaces: []
 
 doh:
   # -- set to true to enabled DNS over HTTPs via cloudflared
@@ -295,7 +293,7 @@ doh:
           - nslookup
           - -po=5053
           - cloudflare.com
-          - '127.0.0.1'
+          - "127.0.0.1"
       # -- defines the initial delay for the liveness probe
       initialDelaySeconds: 60
       # -- defines the failure threshold for the liveness probe
@@ -310,10 +308,8 @@ dnsmasq:
   # - server=/bar.foo/192.168.178.11
 
   # -- Add custom dns entries to override the dns resolution. All lines will be added to the pihole dnsmasq configuration.
-  customDnsEntries: #[]
-  - address=/${PIHOLE_CNAME}/${PIHOLE_WEB_IP}
-  - address=/ha.darioludwig.space/192.168.1.131
-  # - address=/foo.bar/
+  customDnsEntries: []
+  # - address=/foo.bar/192.168.178.10
   # - address=/bar.foo/192.168.178.11
 
   # -- Dnsmasq reads the /etc/hosts file to resolve ips. You can add additional entries if you like
@@ -337,91 +333,29 @@ dnsmasq:
   #  - cname=cname.foo.bar,foo.bar
   #  - cname=cname.bar.foo,bar.foo
   #  - cname=cname record,dns record
-  customCnameEntries:
+  customCnameEntries: []
   # Here we specify custom cname entries that should point to `A` records or
   # elements in customDnsEntries array.
   # The format should be:
-  #  - cname=cname.foo.bar,foo.bar
-  #  - cname=cname.bar.foo,bar.foo
-  #  - cname=cname record,dns record
+  #   - cname=cname.foo.bar,foo.bar
+  #   - cname=cname.bar.foo,bar.foo
+  #   - cname=cname record,dns record
 
 # -- list of adlists to import during initial start of the container
-adlists:
+adlists: {}
 # If you want to provide blocklists, add them here.
-# Suspicious Lists
-- https://raw.githubusercontent.com/PolishFiltersTeam/KADhosts/master/KADhosts.txt
-- https://raw.githubusercontent.com/FadeMind/hosts.extras/master/add.Spam/hosts
-- https://v.firebog.net/hosts/static/w3kbl.txt
-- https://raw.githubusercontent.com/matomo-org/referrer-spam-blacklist/master/spammers.txt
-- https://someonewhocares.org/hosts/zero/hosts
-- https://raw.githubusercontent.com/VeleSila/yhosts/master/hosts
-#- https://winhelp2002.mvps.org/hosts.txt
-- https://v.firebog.net/hosts/neohostsbasic.txt
-# - https://raw.githubusercontent.com/RooneyMcNibNug/pihole-stuff/master/SNAFU.txt
-# - https://paulgb.github.io/BarbBlock/blacklists/hosts-file.txt
-
-# Advertising lists
-- https://adaway.org/hosts.txt
-- https://v.firebog.net/hosts/AdguardDNS.txt
-- https://v.firebog.net/hosts/Admiral.txt
-- https://raw.githubusercontent.com/anudeepND/blacklist/master/adservers.txt
-- https://s3.amazonaws.com/lists.disconnect.me/simple_ad.txt
-- https://v.firebog.net/hosts/Easylist.txt
-# - https://pgl.yoyo.org/adservers/serverlist.php?hostformat=hosts&showintro=0&mimetype=plaintext
-# - https://raw.githubusercontent.com/FadeMind/hosts.extras/master/UncheckyAds/hosts
-- https://raw.githubusercontent.com/bigdargon/hostsVN/master/hosts
-# - https://raw.githubusercontent.com/jdlingyu/ad-wars/master/hosts
-
-# Tracking & Telemetry Lists
-- https://v.firebog.net/hosts/Easyprivacy.txt
-- https://v.firebog.net/hosts/Prigent-Ads.txt
-- https://raw.githubusercontent.com/FadeMind/hosts.extras/master/add.2o7Net/hosts
-- https://raw.githubusercontent.com/crazy-max/WindowsSpyBlocker/master/data/hosts/spy.txt
-- https://hostfiles.frogeye.fr/firstparty-trackers-hosts.txt
-- https://www.github.developerdan.com/hosts/lists/ads-and-tracking-extended.txt
-- https://raw.githubusercontent.com/Perflyst/PiHoleBlocklist/master/android-tracking.txt
-- https://raw.githubusercontent.com/Perflyst/PiHoleBlocklist/master/SmartTV.txt
-- https://raw.githubusercontent.com/Perflyst/PiHoleBlocklist/master/AmazonFireTV.txt
-- https://gitlab.com/quidsup/notrack-blocklists/raw/master/notrack-blocklist.txt
-
-# Malicious Lists
-- https://raw.githubusercontent.com/DandelionSprout/adfilt/master/Alternate%20versions%20Anti-Malware%20List/AntiMalwareHosts.txt
-- https://osint.digitalside.it/Threat-Intel/lists/latestdomains.txt
-- https://s3.amazonaws.com/lists.disconnect.me/simple_malvertising.txt
-- https://v.firebog.net/hosts/Prigent-Crypto.txt
-- https://raw.githubusercontent.com/FadeMind/hosts.extras/master/add.Risk/hosts
-- https://bitbucket.org/ethanr/dns-blacklists/raw/8575c9f96e5b4a1308f2f12394abd86d0927a4a0/bad_lists/Mandiant_APT1_Report_Appendix_D.txt
-- https://phishing.army/download/phishing_army_blocklist_extended.txt
-- https://gitlab.com/quidsup/notrack-blocklists/raw/master/notrack-malware.txt
-- https://v.firebog.net/hosts/RPiList-Malware.txt
-- https://v.firebog.net/hosts/RPiList-Phishing.txt
-# - https://raw.githubusercontent.com/Spam404/lists/master/main-blacklist.txt
-# - https://raw.githubusercontent.com/AssoEchap/stalkerware-indicators/master/generated/hosts
-# - https://urlhaus.abuse.ch/downloads/hostfile/
-# - https://malware-filter.gitlab.io/malware-filter/phishing-filter-hosts.txt
-- https://v.firebog.net/hosts/Prigent-Malware.txt
-
-# Other Lists
-- https://zerodot1.gitlab.io/CoinBlockerLists/hosts_browser
-# - https://raw.githubusercontent.com/chadmayfield/my-pihole-blocklists/master/lists/pi_blocklist_porn_top1m.list
-# - https://v.firebog.net/hosts/Prigent-Adult.txt
-# - https://raw.githubusercontent.com/anudeepND/blacklist/master/facebook.txt
+# - https://hosts-file.net/grm.txt
+# - https://reddestdream.github.io/Projects/MinimalHosts/etc/MinimalHostsBlocker/minimalhosts
 
 # -- list of whitelisted domains to import during initial start of the container
-whitelist:
+whitelist: {}
 # If you want to provide whitelisted domains, add them here.
-- https://raw.githubusercontent.com/anudeepND/whitelist/master/domains/whitelist.txt
-- (\.|^)zeit\.de$
-- (\.|^)tagesschau\.de$
-- zeit.de
-- tagesschau.de
-- spotify.com
+# - clients4.google.com
 
 # -- list of blacklisted domains to import during initial start of the container
-blacklist:
+blacklist: {}
 # If you want to have special domains blacklisted, add them here
 # - *.blackist.com
-- cloud.mikrotik.com
 
 # -- list of blacklisted regex expressions to import during initial start of the container
 regex: {}
@@ -448,6 +382,11 @@ hostNetwork: "false"
 # -- should container run in privileged mode
 privileged: "false"
 
+# linux capabilities container should run with
+capabilities: {}
+# add:
+# - NET_ADMIN
+
 customVolumes:
   # -- set this to true to enable custom volumes
   enabled: false
@@ -467,6 +406,21 @@ extraVolumeMounts: {}
 # external-conf:
 #   mountPath: /etc/lighttpd/external.conf
 #   subPath: external.conf
+
+extraContainers: []
+# - name: pihole-logwatcher
+#   image: your-registry/pihole-logwatcher
+#   imagePullPolicy: Always
+#   resources:
+#     requests:
+#       cpu: 100m
+#       memory: 5Mi
+#     limits:
+#       cpu: 100m
+#       memory: 5Mi
+#   volumeMounts:
+#   - name: pihole-logs
+#     mountPath: /var/log/pihole
 
 # -- any extra kubernetes manifests you might want
 extraObjects: []
@@ -507,6 +461,22 @@ podAnnotations: {}
 # prometheus.io/port: '9617'
 # prometheus.io/scrape: 'true'
 
+# -- any initContainers you might want to run before starting pihole
+extraInitContainers: []
+# - name: copy-config
+#   image: busybox
+#   args:
+#     - sh
+#     - -c
+#     - |
+#       cp /etc/lighttpd-cm/external.conf /etc/lighttpd/
+#       ls -l /etc/lighttpd/
+#   volumeMounts:
+#     - name: external-conf-cm
+#       mountPath: /etc/lighttpd-cm/
+#     - name: external-conf
+#       mountPath: /etc/lighttpd/
+
 monitoring:
   # -- Preferably adding prometheus scrape annotations rather than enabling podMonitor.
   podMonitor:
@@ -535,3 +505,11 @@ podDnsConfig:
   - 127.0.0.1
   - 8.8.8.8
 
+# -- configure a Pod Disruption Budget
+podDisruptionBudget:
+  # -- set to true to enable creating the PDB
+  enabled: false
+  # -- minimum number of pods Kubernetes should try to have running at all times
+  minAvailable: 1
+  # -- maximum number of pods Kubernetes will allow to be unavailable. Cannot set both `minAvailable` and `maxAvailable`
+  # maxUnavailable: 1

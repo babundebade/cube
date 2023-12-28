@@ -10,9 +10,9 @@ resource "helm_release" "cert-manager" {
   repository = "https://charts.jetstack.io"
   chart      = "cert-manager"
 
-  values = [file("${path.module}/services/cert-manager/values.yaml")]
+  #values = [file("${path.module}/services/cert-manager/values.yaml")]
 
-  depends_on = [kubernetes_namespace.namespace_cert_manager, helm_release.metallb]
+  depends_on = [kubernetes_namespace.namespace_cert_manager]
 }
 
 resource "tls_private_key" "cert_key" {

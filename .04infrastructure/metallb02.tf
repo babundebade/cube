@@ -3,7 +3,7 @@ resource "kubernetes_manifest" "ipaddresspool_metallb_pool" {
     apiVersion = "metallb.io/v1beta1"
     kind       = "IPAddressPool"
     metadata = {
-      name      = "metallb_ip_pool"
+      name      = "metallb-ip-pool"
       namespace = "metallb-system"
     }
     spec = {
@@ -15,7 +15,6 @@ resource "kubernetes_manifest" "ipaddresspool_metallb_pool" {
 }
 
 resource "kubernetes_manifest" "l2advertisement_metallb" {
-  depends_on = [helm_release.metallb]
   manifest = {
     apiVersion = "metallb.io/v1beta1"
     kind       = "L2Advertisement"
@@ -24,9 +23,7 @@ resource "kubernetes_manifest" "l2advertisement_metallb" {
       namespace = "metallb-system"
     }
     spec = {
-      ipAddressPools = [
-        kubernetes_manifest.ipaddresspool_metallb_pool.manifest.metadata[0].name
-      ]
+      ipAddressPools = ["metallb-ip-pool"]
     }
   }
 }
