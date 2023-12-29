@@ -53,8 +53,8 @@ serviceDns:
   # -- A fixed `spec.loadBalancerIP` for the DNS Service
   loadBalancerIP: ${PIHOLE_DNS_IP}
   annotations:
-    metallb.universe.tf/address-pool: pihole-pool
-    metallb.universe.tf/allow-shared-ip: pihole-pool
+    metallb.universe.tf/address-pool: metallb-ip-pool
+    metallb.universe.tf/allow-shared-ip: metallb-ip-pool
 
   type: LoadBalancer
   # -- A fixed `spec.loadBalancerIP` for the IPv6 DNS Service

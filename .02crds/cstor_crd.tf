@@ -42,7 +42,18 @@ resource "helm_release" "cstor" {
     name  = "openebs-ndm.enabled"
     value = "true"
   }
-
+  set_list {
+    name = "ndm.filters.includePaths"
+    value = [ "/dev/sda" ]
+  }
+  set {
+    name = "ndmExporter.enabled"
+    value = "true"
+  }
+  set {
+    name = "localprovisioner.enabled"
+    value = "false"
+  }
   set {
     name  = "jiva.enabled"
     value = "false"

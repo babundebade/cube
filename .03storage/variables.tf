@@ -2,7 +2,7 @@
 variable "cluster_name" {
   type        = string
   description = "value of cluster_name"
-  default     = "ubuntu-cube"
+  default     = "talos-cube"
 }
 
 # variable "cluster_kubeconfig_path" {
@@ -37,6 +37,12 @@ variable "tld_domain" {
 }
 
 # Cert-manager variables
+variable "namespace_cert_manager" {
+  type        = string
+  default     = "cert-manager"
+  description = "namespace for cert-manager"
+}
+
 variable "email" {
   type        = string
   default     = ""

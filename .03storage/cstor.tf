@@ -23,7 +23,6 @@ output "blockdevices" {
 #   ]
 # }
 
-
 resource "kubernetes_manifest" "openebs_cstor_pool" {
   manifest = {
     "apiVersion" = "cstor.openebs.io/v1"
@@ -33,13 +32,13 @@ resource "kubernetes_manifest" "openebs_cstor_pool" {
       "namespace" = "openebs"
     }
     "spec" = {
-      "pools" = [for bd in output.blockdevices : {
+      "pools" = [for bd in data.kubernetes_resources.block_devices.objects : {
         "nodeSelector" = {
-          "kubernetes.io/hostname" = bd.NODENAME
+          "kubernetes.io/hostname" = bd.spec.nodeAttributes.nodeName
         },
         "dataRaidGroups" = [{
           "blockDevices" = [{
-            "blockDeviceName" = bd.BLOCKDEVICENAME
+            "blockDeviceName" = bd.metadata.name
           }]
         }],
         "poolConfig" = {

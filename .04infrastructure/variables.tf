@@ -37,6 +37,12 @@ variable "tld_domain" {
 }
 
 # Cert-manager variables
+variable "namespacecertmanager" {
+  type        = string
+  default     = "cert-manager"
+  description = "namespace for cert-manager"
+}
+
 variable "email" {
   type        = string
   default     = ""
