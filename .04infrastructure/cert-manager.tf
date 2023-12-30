@@ -39,46 +39,55 @@ resource "kubernetes_secret" "root_secret" {
   }
 }
 
-resource "k8s_cert_manager_io_cluster_issuer_v1" "root_issuer" {
-  metadata = {
-    name      = var.root_issuer_name
-    namespace = var.namespacecertmanager
-  }
-  spec = {
-    self_signed = {}
-  }
-}
-
-resource "k8s_cert_manager_io_certificate_v1" "root_cert" {
-  metadata = {
-    name = var.root_cert_name
-    namespace = var.namespacecertmanager
-  }
-  spec = {
-    is_ca = true
-    common_name = var.root_cert_name
-    secret_name = var.root_secret_name
-    private_key = {
-      algorithm = "ECDSA"
-      size = 256
-    }
-    issuer_ref = {
+resource "kubernetes_manifest" "root_issuer" {
+  manifest = {
+    apiVersion = "cert-manager.io/v1"
+    kind       = "ClusterIssuer"
+    metadata = {
       name = var.root_issuer_name
-      kind = "ClusterIssuer"
-      group = "cert-manager.io"
+    }
+    spec = {
+      selfSigned = {}
     }
   }
 }
 
-resource "k8s_cert_manager_io_cluster_issuer_v1" "cert_issuer" {
-  metadata = {
-    name = var.cert_issuer_name
-    namespace = var.namespacecertmanager
+resource "kubernetes_manifest" "root_cert" {
+  manifest = {
+    apiVersion = "cert-manager.io/v1"
+    kind       = "Certificate"
+    metadata = {
+      name      = var.root_cert_name
+      namespace = var.namespacecertmanager
+    }
+    spec = {
+      isCA        = true
+      commonName  = var.root_cert_name
+      secretName  = var.root_secret_name
+      privateKey = {
+        algorithm = "ECDSA"
+        size      = 256
+      }
+      issuerRef = {
+        name  = var.root_issuer_name
+        kind  = "ClusterIssuer"
+        group = "cert-manager.io"
+      }
+    }
   }
+}
 
-  spec = {
-    ca = {
-      secret_name = var.root_secret_name
+resource "kubernetes_manifest" "cert_issuer" {
+  manifest = {
+    apiVersion = "cert-manager.io/v1"
+    kind       = "ClusterIssuer"
+    metadata = {
+      name = var.cert_issuer_name
+    }
+    spec = {
+      ca = {
+        secretName = var.root_secret_name
+      }
     }
   }
 }
