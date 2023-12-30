@@ -14,11 +14,27 @@ resource "null_resource" "kubeconfig_home_assistant" {
 resource "helm_release" "home_assistant" {
   name       = "home-assistant"
   namespace  = "home-assistant"
-  repository = "https://charts.pree.dev"
+  repository = "https://charts.alekc.dev/"
   chart      = "home-assistant"
-  version    = "1.29.1"
+  version    = "latest"
 
-  values     = [file("services/home-assistant/values.yaml")]
+  set {
+    name = "nodeSelector.kubernetes\\.io/hostname"
+    value = "cntrlpln-13-blue"
+  }
+  set {
+    name = "persistence.enabled"
+    value = false
+  }
+  # set {
+  #   name = "persistence.storageClass"
+  #   value = var.storage_class_name
+  # }
+  # set {
+  #   name = "persistence.existingClaim"
+  #   value = kubernetes_persistent_volume_claim.ha_pvc.metadata[0].name
+  # }
+  #values     = [file("services/home-assistant/values.yaml")]
   depends_on = [kubernetes_namespace.home_assistant_namespace, null_resource.kubeconfig_home_assistant]
 }
 
@@ -27,7 +43,7 @@ resource "kubernetes_ingress_v1" "ha_ingress" {
     name      = "home-assistant-ingress"
     namespace = kubernetes_namespace.home_assistant_namespace.metadata[0].name
     annotations = {
-      "cert-manager.io/cluster-issuer" = "cert-issuer"
+      "cert-manager.io/cluster-issuer" = var.cert_issuer_name
     }
   }
 
@@ -63,13 +79,13 @@ resource "kubernetes_persistent_volume_claim" "ha_pvc" {
   }
 
   spec {
-    storage_class_name = "openebs-jiva-csi-default"
+    storage_class_name = var.storage_class_name
     access_modes = ["ReadWriteOnce"]
     resources {
       requests = {
-        storage = "1Gi"
+        storage = "5Gi"
       }
     }
   }
-  depends_on = [helm_release.home_assistant]
+  
 }
