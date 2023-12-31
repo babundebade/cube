@@ -1,0 +1,21 @@
+---
+- name: Clean up Released Persistent Volumes in Kubernetes
+  hosts: localhost
+  gather_facts: no
+  collections:
+    - kubernetes.core
+  tasks:
+    - name: Get list of all Persistent Volumes
+      k8s_info:
+        api_version: v1
+        kind: PersistentVolume
+      register: pv_list
+
+    - name: Delete Released Persistent Volumes
+      k8s:
+        state: absent
+        api_version: v1
+        kind: PersistentVolume
+        name: "{{ item.metadata.name }}"
+      loop: "{{ pv_list.resources }}"
+      when: item.status.phase == 'Released'

@@ -16,7 +16,7 @@ resource "helm_release" "home_assistant" {
   namespace  = "home-assistant"
   repository = "https://charts.alekc.dev/"
   chart      = "home-assistant"
-  version    = "latest"
+  #version    = "latest"
 
   set {
     name = "nodeSelector.kubernetes\\.io/hostname"
