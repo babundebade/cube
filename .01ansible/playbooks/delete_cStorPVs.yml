@@ -1,0 +1,33 @@
+---
+- name: Clean up cStorVolumes not bound to any PVCs in Kubernetes
+  hosts: localhost
+  gather_facts: no
+  collections:
+    - kubernetes.core
+  tasks:
+    - name: Get list of all PersistentVolumeClaims in all namespaces
+      k8s_info:
+        api_version: v1
+        kind: PersistentVolumeClaim
+      register: pvc_list
+
+    - name: Extract the list of Persistent Volumes bound to PVCs
+      set_fact:
+        bound_pvs: "{{ pvc_list.resources | selectattr('status.phase', 'equalto', 'Bound') | map(attribute='spec.volumeName') | list }}"
+
+    - name: Get list of all cStorVolumes in all namespaces
+      k8s_info:
+        api_version: cstor.openebs.io/v1
+        kind: CStorVolume
+      register: cv_list
+
+    - name: Delete cStorVolumes not bound to any PVCs
+      k8s:
+        state: absent
+        api_version: cstor.openebs.io/v1
+        kind: CStorVolume
+        name: "{{ item.metadata.name }}"
+        namespace: "{{ item.metadata.namespace }}"
+      loop: "{{ cv_list.resources }}"
+      when: "'pvc-' + item.metadata.name not in bound_pvs"
+      ignore_errors: yes

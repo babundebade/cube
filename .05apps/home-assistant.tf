@@ -87,5 +87,7 @@ resource "kubernetes_persistent_volume_claim" "ha_pvc" {
       }
     }
   }
-  
+  # lifecycle {
+  #   prevent_destroy = true
+  # }
 }
