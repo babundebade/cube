@@ -1,0 +1,38 @@
+---
+- name: Setup SSH Key and Transfer to Hosts
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Check if SSH private key exists
+      stat:
+        path: "/home/dario/.ssh/id_rsa"
+      register: ssh_key
+
+    - name: Generate SSH key pair
+      command: ssh-keygen -t rsa -b 4096 -f "/home/dario/.ssh/id_rsa"
+      args:
+        creates: "/home/dario/.ssh/id_rsa"
+      when: not ssh_key.stat.exists
+
+- name: Transfer SSH Public Key to Hosts
+  hosts: all
+  gather_facts: no
+  vars_prompt:
+    - name: ansible_ssh_pass
+      prompt: "SSH password for remote hosts"
+      private: yes
+
+  tasks:
+    - name: Ensure .ssh directory exists on remote hosts
+      file:
+        path: "~/.ssh"
+        state: directory
+        mode: '0700'
+      delegate_to: "{{ inventory_hostname }}"
+
+    - name: Set authorized key taken from local file
+      authorized_key:
+        user: "{{ ansible_user }}"
+        state: present
+        key: "{{ lookup('file', '/home/dario/.ssh/id_rsa.pub') }}"
+      delegate_to: "{{ inventory_hostname }}"
