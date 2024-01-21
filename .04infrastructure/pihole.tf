@@ -30,9 +30,9 @@ resource "kubernetes_persistent_volume_claim_v1" "pihole_pvc" {
       }
     }
   }
-  lifecycle {
-    prevent_destroy = true
-  }
+  # lifecycle {
+  #   prevent_destroy = true
+  # }
 }
 
 
