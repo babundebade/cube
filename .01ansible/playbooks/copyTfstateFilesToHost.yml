@@ -1,0 +1,33 @@
+---
+- name: Copy .tfstate files to controlplane host
+  hosts: localhost
+  gather_facts: no
+  vars:
+    local_source_dir: "~/cube"
+    remote_dest_dir: "~"  # Adjust as needed for the remote home directory
+  tasks:
+    - name: Find .tfstate files in the source directory
+      find:
+        paths: "{{ local_source_dir }}"
+        patterns: "*.tfstate"
+        recurse: yes
+      register: tfstate_files
+
+    - name: Ensure remote directory structure exists
+      file:
+        path: "{{ remote_dest_dir }}/{{ item.path | regex_replace('^' + local_source_dir + '/', '') }}"
+        state: directory
+      loop: "{{ tfstate_files.files }}"
+      delegate_to: controlplane
+      become: yes
+
+    - name: Copy .tfstate files to controlplane host
+      synchronize:
+        src: "{{ item.path }}"
+        dest: "{{ remote_dest_dir }}/{{ item.path | regex_replace('^' + local_source_dir + '/', '') }}"
+        mode: push
+        recursive: yes
+        dirs: yes
+      loop: "{{ tfstate_files.files }}"
+      delegate_to: controlplane
+
