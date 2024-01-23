@@ -1,10 +1,12 @@
 ---
-- name: Copy .tfstate files to controlplane host
+- name: Copy .tfstate files to all hosts in controlplanes group
   hosts: localhost
   gather_facts: no
   vars:
     local_source_dir: "~/cube"
+    staging_dir: "~/staging_tfstate_files"  # Temporary local directory for staging files
     remote_dest_dir: "~"  # Adjust as needed for the remote home directory
+
   tasks:
     - name: Find .tfstate files in the source directory
       find:
@@ -13,21 +15,29 @@
         recurse: yes
       register: tfstate_files
 
-    - name: Ensure remote directory structure exists
+    - name: Create staging directory on localhost
       file:
-        path: "{{ remote_dest_dir }}/{{ item.path | regex_replace('^' + local_source_dir + '/', '') }}"
+        path: "{{ staging_dir }}"
         state: directory
-      loop: "{{ tfstate_files.files }}"
-      delegate_to: controlplane
-      become: yes
 
-    - name: Copy .tfstate files to controlplane host
-      synchronize:
+    - name: Fetch .tfstate files to control node
+      fetch:
         src: "{{ item.path }}"
-        dest: "{{ remote_dest_dir }}/{{ item.path | regex_replace('^' + local_source_dir + '/', '') }}"
-        mode: push
-        recursive: yes
-        dirs: yes
+        dest: "{{ staging_dir }}/"
+        flat: yes
       loop: "{{ tfstate_files.files }}"
-      delegate_to: controlplane
+      when: tfstate_files.matched > 0
 
+    - name: Copy .tfstate files from control node to each host in controlplanes
+      copy:
+        src: "{{ staging_dir }}/{{ item.1.path | basename }}"
+        dest: "{{ remote_dest_dir }}/{{ item.1.path | regex_replace('^' + local_source_dir + '/', '') }}"
+      loop: "{{ query('cartesian', groups['controlplanes'], tfstate_files.files) }}"
+      when: tfstate_files.matched > 0
+      become: yes  # Use become as needed based on your controlplane host's requirements
+
+    - name: Remove staging directory on localhost
+      file:
+        path: "{{ staging_dir }}"
+        state: absent
+      when: tfstate_files.matched > 0
