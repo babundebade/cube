@@ -23,6 +23,7 @@ resource "helm_release" "metallb" {
   namespace  = kubernetes_namespace.metallb_namespace.metadata[0].name
   repository = "https://metallb.github.io/metallb"
   chart      = "metallb"
+  version    = var.version_metallb
 
   #values = [file("services/metallb/values.yaml")]
   depends_on = [ kubernetes_labels.label_metallb_namespace ]

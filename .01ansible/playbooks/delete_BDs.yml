@@ -1,0 +1,21 @@
+---
+- name: Clean up Released openebs Blockdevices in Kubernetes
+  hosts: localhost
+  gather_facts: no
+  collections:
+    - kubernetes.core
+  tasks:
+    - name: Get list of all Blockdevices
+      k8s_info:
+        api_version: v1
+        kind: Blockdevice
+      register: bd_list
+
+    - name: Delete Released Blockdevices
+      k8s:
+        state: absent
+        api_version: v1
+        kind: Blockdevice
+        name: "{{ item.metadata.name }}"
+      loop: "{{ bd_list.resources }}"
+      when: item.status.phase == 'Released'

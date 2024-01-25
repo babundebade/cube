@@ -6,10 +6,10 @@ resource "kubernetes_namespace" "namespace_cert_manager" {
 
 resource "helm_release" "cert-manager" {
   name       = "cert-manager"
-  namespace  = var.namespace_cert_manager
+  namespace  = kubernetes_namespace.namespace_cert_manager.metadata[0].name
   repository = "https://charts.jetstack.io"
   chart      = "cert-manager"
-  version    = "v1.5.3"
+  version    = var.version_cert_manager
 
   #values = [file("${path.module}/services/cert-manager/values.yaml")]
   set {

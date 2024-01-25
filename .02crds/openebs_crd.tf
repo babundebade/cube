@@ -30,14 +30,13 @@ resource "helm_release" "cstor" {
   name       = "openebs"
   repository = "https://openebs.github.io/charts"
   chart      = "openebs"
-  #version    = "3.10.0"
+  version    = var.version_openebs
   namespace  = kubernetes_namespace.namespace_openebs.metadata[0].name
 
   set {
     name  = "cstor.enabled"
     value = "true"
   }
-
   set {
     name  = "openebs-ndm.enabled"
     value = "true"
@@ -58,27 +57,22 @@ resource "helm_release" "cstor" {
     name  = "jiva.enabled"
     value = "false"
   }
-
   set {
     name  = "localpv-provisioner.enabled"
     value = "false"
   }
-
   set {
     name  = "zfs-localpv.enabled"
     value = "false"
   }
-
   set {
     name  = "lvm-localpv.enabled"
     value = "false"
   }
-
   set {
     name  = "nfs-provisioner.enabled"
     value = "false"
   }
-
   set {
     name  = "mayastor.enabled"
     value = "false"
