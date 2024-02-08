@@ -28,8 +28,12 @@
         src: "{{ item.path }}"
         dest: "{{ remote_dest_dir }}/{{ item.path | regex_replace('^' + local_source_dir + '/', '') }}"
         mode: push
-        compare_dest: true
+        rsync_opts:
+          - "--update"
+          - "--times"
+        # Additional rsync_opts can be added based on your requirements
       loop: "{{ target_files.files }}"
       when: target_files.matched > 0
-      delegate_to: localhost  # Delegate this task to localhost to push files to the remote hosts
+      delegate_to: localhost
       become: true
+
