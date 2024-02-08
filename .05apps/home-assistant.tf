@@ -14,9 +14,9 @@ resource "null_resource" "kubeconfig_home_assistant" {
 resource "helm_release" "home_assistant" {
   name       = "home-assistant"
   namespace  = "home-assistant"
-  repository = "https://charts.alekc.dev/"
+  repository = "http://pajikos.github.io/home-assistant-helm-chart/"
   chart      = "home-assistant"
-  #version    = "latest"
+  version    = var.version_home_assistant
 
   set {
     name = "nodeSelector.kubernetes\\.io/hostname"

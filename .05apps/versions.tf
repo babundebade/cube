@@ -13,7 +13,7 @@ variable "version_openebs" {
 
 variable "version_metallb" {
   type        = string
-  default     = "v0.14.3"  #08.02.2024
+  default     = "v0.13.12"  #24.01.2024
   description = "version of metallb"
 }
 

@@ -96,3 +96,9 @@ variable "storage_class_name" {
   description = "name of standard storage class"
 }
 
+variable "cloudflareToken" {
+  type        = string
+  default     = ""
+  description = "Cloudflare API Token"
+  sensitive   = true
+}

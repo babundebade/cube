@@ -30,9 +30,9 @@ resource "kubernetes_persistent_volume_claim_v1" "pihole_pvc" {
       }
     }
   }
-  # lifecycle {
-  #   prevent_destroy = true
-  # }
+  lifecycle {
+    prevent_destroy = true
+  }
 }
 
 
@@ -123,6 +123,7 @@ resource "helm_release" "pihole" {
   namespace  = kubernetes_namespace.pihole_namespace.metadata[0].name
   repository = "https://mojo2600.github.io/pihole-kubernetes/"
   chart      = "pihole" #mojo2600/pihole
+  version    = var.version_pihole
 
   values = [templatefile("${path.module}/services/pihole/values-pihole.yaml", {
     PIHOLE_DNS_IP = var.dns_IPv4
@@ -153,6 +154,7 @@ resource "kubernetes_ingress_v1" "pihole_ingress" {
     namespace = kubernetes_namespace.pihole_namespace.metadata[0].name
     annotations = {
       "cert-manager.io/cluster-issuer" = var.cert_issuer_name
+      #"nginx.ingress.kubernetes.io/backend-protocol" = "HTTPS"
     }
   }
 
@@ -166,7 +168,7 @@ resource "kubernetes_ingress_v1" "pihole_ingress" {
       host = var.tld_domain
       http {
         path {
-          path = "/admin"
+          path     = "/admin"
           backend {
             service {
               name = "pihole-web"
@@ -179,5 +181,5 @@ resource "kubernetes_ingress_v1" "pihole_ingress" {
       }
     }
   }
-  depends_on = [ helm_release.ingress_nginx ]
+  depends_on = [helm_release.ingress_nginx]
 }
