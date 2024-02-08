@@ -1,0 +1,35 @@
+---
+- name: Synchronize .tfstate and .tfvars files to control plane nodes
+  hosts: controlplanes
+  gather_facts: no
+  vars:
+    local_source_dir: "~/cube"
+    remote_dest_dir: "~/remote_tfstate_files"  # Adjust for the remote directory on control plane nodes
+    file_types: ['*.tfstate', '*.tfvars']
+
+  tasks:
+    - name: Find target files in the source directory
+      find:
+        paths: "{{ local_source_dir }}"
+        patterns: "{{ file_types }}"
+        recurse: yes
+      register: target_files
+      delegate_to: localhost  # Execute this task on the localhost
+
+    - name: Ensure remote directory exists on control plane nodes
+      ansible.builtin.file:
+        path: "{{ remote_dest_dir }}"
+        state: directory
+        mode: '0755'
+      become: true
+
+    - name: Synchronize target files from workstation to control plane nodes
+      synchronize:
+        src: "{{ item.path }}"
+        dest: "{{ remote_dest_dir }}/{{ item.path | regex_replace('^' + local_source_dir + '/', '') }}"
+        mode: push
+        compare_dest: true
+      loop: "{{ target_files.files }}"
+      when: target_files.matched > 0
+      delegate_to: localhost  # Delegate this task to localhost to push files to the remote hosts
+      become: true

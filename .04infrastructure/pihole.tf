@@ -180,6 +180,22 @@ resource "kubernetes_ingress_v1" "pihole_ingress" {
         }
       }
     }
+    rule {
+      host = var.tld_domain
+      http {
+        path {
+          path     = "/admin"
+          backend {
+            service {
+              name = "pihole-web"
+              port {
+                number = 443
+              }
+            }
+          }
+        }
+      }
+    }
   }
   depends_on = [helm_release.ingress_nginx]
 }

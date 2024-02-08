@@ -1,11 +1,11 @@
 ---
-- name: Copy .tfstate files to all hosts in controlplanes group
+- name: Copy .tfstate files to control plane node
   hosts: localhost
   gather_facts: no
   vars:
     local_source_dir: "~/cube"
-    staging_dir: "~/staging_tfstate_files"  # Temporary local directory for staging files
-    remote_dest_dir: "~"  # Adjust as needed for the remote home directory
+    remote_dest_dir: "~/remote_tfstate_files"  # Adjust as needed for the remote directory on controlplane node
+    controlplane_host: "your_controlplane_host"  # Specify your control plane host or group
 
   tasks:
     - name: Find .tfstate files in the source directory
@@ -15,29 +15,20 @@
         recurse: yes
       register: tfstate_files
 
-    - name: Create staging directory on localhost
-      file:
-        path: "{{ staging_dir }}"
+    - name: Ensure remote directory exists on control plane node
+      ansible.builtin.file:
+        path: "{{ remote_dest_dir }}"
         state: directory
-
-    - name: Fetch .tfstate files to control node
-      fetch:
-        src: "{{ item.path }}"
-        dest: "{{ staging_dir }}/"
-        flat: yes
-      loop: "{{ tfstate_files.files }}"
-      when: tfstate_files.matched > 0
-
-    - name: Copy .tfstate files from control node to each host in controlplanes
-      copy:
-        src: "{{ staging_dir }}/{{ item.1.path | basename }}"
-        dest: "{{ remote_dest_dir }}/{{ item.1.path | regex_replace('^' + local_source_dir + '/', '') }}"
-      loop: "{{ query('cartesian', groups['controlplanes'], tfstate_files.files) }}"
-      when: tfstate_files.matched > 0
+        mode: '0755'
+      delegate_to: "{{ controlplane_host }}"
       become: yes  # Use become as needed based on your controlplane host's requirements
 
-    - name: Remove staging directory on localhost
-      file:
-        path: "{{ staging_dir }}"
-        state: absent
+    - name: Copy .tfstate files from workstation to control plane node
+      copy:
+        src: "{{ item.path }}"
+        dest: "{{ remote_dest_dir }}/{{ item.path | regex_replace('^' + local_source_dir + '/', '') }}"
+        mode: '0644'
+      loop: "{{ tfstate_files.files }}"
       when: tfstate_files.matched > 0
+      delegate_to: "{{ controlplane_host }}"
+      become: yes  # Use become as needed based on your controlplane host's requirements
