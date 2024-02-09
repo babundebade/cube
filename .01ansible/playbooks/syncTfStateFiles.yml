@@ -1,39 +1,55 @@
 ---
-- name: Synchronize .tfstate and .tfvars files to control plane nodes
+- name: Ensure correct permissions and ownership for synchronization directories
+  hosts: controlplanes
+  gather_facts: no
+  become: true
+  vars:
+    base_remote_dir: "~/cube"  # Define variable here to make it accessible in this play
+  tasks:
+    - name: Ensure base directory exists and has correct permissions on the remote hosts
+      file:
+        path: "{{ base_remote_dir }}"
+        state: directory
+        owner: dario
+        group: sudo  # Use 'sudo' group for Ubuntu
+        mode: '2775'  # Sets sticky bit to preserve group ownership on new files, and allows read-write-execute for owner and group
+
+- name: Synchronize .tfstate and .tfvars files within ~/cube directory to control plane nodes
   hosts: controlplanes
   gather_facts: no
   vars:
     local_source_dir: "~/cube"
-    remote_dest_dir: "~/remote_tfstate_files"  # Adjust for the remote directory on control plane nodes
-    file_types: ['*.tfstate', '*.tfvars']
-
+    base_remote_dir: "~/cube"  # Ensure variable is also defined here for consistency
   tasks:
-    - name: Find target files in the source directory
+    - name: Find .tfstate and .tfvars files in the source directory
       find:
         paths: "{{ local_source_dir }}"
-        patterns: "{{ file_types }}"
+        patterns: "*.tfstate,*.tfvars"
         recurse: yes
-      register: target_files
-      delegate_to: localhost  # Execute this task on the localhost
+      register: found_files
+      delegate_to: localhost
 
-    - name: Ensure remote directory exists on control plane nodes
+    - name: Ensure the base directory exists on the remote hosts
       ansible.builtin.file:
-        path: "{{ remote_dest_dir }}"
+        path: "{{ item.path | regex_replace(local_source_dir, base_remote_dir) | regex_replace('/[^/]+$', '') }}"
         state: directory
-        mode: '0755'
+        mode: '2775'
+        owner: dario
+        group: sudo  # Use 'sudo' group for Ubuntu
+      loop: "{{ found_files.files }}"
       become: true
+      when: found_files.matched > 0
 
-    - name: Synchronize target files from workstation to control plane nodes
+    - name: Synchronize the newest .tfstate and .tfvars files to the remote hosts, maintaining the directory structure
       synchronize:
         src: "{{ item.path }}"
-        dest: "{{ remote_dest_dir }}/{{ item.path | regex_replace('^' + local_source_dir + '/', '') }}"
+        dest: "{{ item.path | regex_replace('^' + local_source_dir, base_remote_dir) }}"
         mode: push
         rsync_opts:
-          - "--update"
-          - "--times"
-        # Additional rsync_opts can be added based on your requirements
-      loop: "{{ target_files.files }}"
-      when: target_files.matched > 0
+          - "--update"  # Ensures only newer files are transferred
+          - "--times"   # Preserves modification times
+          - "--chown=dario:sudo"  # Ensures files and directories are owned by dario and sudo group
+          - "--chmod=2775"  # Sets permissions to allow group writes and preserve group ownership
+      loop: "{{ found_files.files }}"
+      when: found_files.matched > 0
       delegate_to: localhost
-      become: true
-
