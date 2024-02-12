@@ -2,18 +2,26 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+# Number of replicas for the deployment
 replicaCount: 1
 
+# Image settings
 image:
-  repository: homeassistant/home-assistant
+  # Repository for the Home Assistant image
+  repository: ghcr.io/home-assistant/home-assistant
+  # Image pull policy
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
 
+# List of imagePullSecrets for private image repositories
 imagePullSecrets: []
+# Override the default name of the Helm chart
 nameOverride: ""
+# Override the default full name of the Helm chart
 fullnameOverride: ""
 
+# Service account settings
 serviceAccount:
   # Specifies whether a service account should be created
   create: true
@@ -23,73 +31,168 @@ serviceAccount:
   # If not set and create is true, a name is generated using the fullname template
   name: ""
 
+# Annotations to add to the pod
 podAnnotations: {}
 
-podSecurityContext: {}
-# fsGroup: 2000
+# Pod security context settings
+podSecurityContext:
+  {}
+  # runAsUser: 568
+  # runAsGroup: 568
+  # fsGroup: 568
+  # fsGroupChangePolicy: "OnRootMismatch"
 
-securityContext: {}
-# capabilities:
-#   drop:
-#   - ALL
-# readOnlyRootFilesystem: true
-# runAsNonRoot: true
-# runAsUser: 1000
+# Environment variables
+env: 
+- name: TZ
+  value: Europe/Berlin
+# - name: SOME_VAR_FROM_CONFIG_MAP
+#   valueFrom:
+#     configMapRef:
+#       name: configmap-name
+#       key: config-key
+# - name: SOME_SECRET
+#   valueFrom:
+#     secretKeyRef:
+#       name: secret-name
+#       key: secret-key
 
-service:
-  type: ClusterIP
+# Use environment variables from ConfigMaps or Secrets
+envFrom: []
+# - configMapRef:
+#     name: config-map-name
+# - secretRef:
+#     name: secret-name
+
+hostPort:
+  # Enable 'hostPort' or not
+  enabled: false
   port: 8123
 
-# -- Enables host networking (so that home assistant can scan devices automatically on the same network). If set to false, you might want to amend dnsPolicy value as well
+# Specifies if the containers should be started in hostNetwork mode.
+#
+# Required for use auto-discovery feature of Home Assistant
 hostNetwork: true
 
-# -- Dns policy
-dnsPolicy: ClusterFirstWithHostNet
+# Container security context settings
+securityContext:
+  {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
 
-ingress:
-  enabled: false
-  className: ""
-  annotations: {}
-  # kubernetes.io/ingress.class: nginx
-  # kubernetes.io/tls-acme: "true"
-  hosts:
-  - host: chart-example.local
-    paths:
-    - path: /
-      pathType: ImplementationSpecific
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
+# Service settings
+service:
+  # Service type (ClusterIP, NodePort, LoadBalancer, or ExternalName)
+  type: ClusterIP
+  # Service port
+  port: 8080
 
-resources: {}
-# We usually recommend not to specify default resources and to leave this as a conscious
-# choice for the user. This also increases chances charts run on environments with little
-# resources, such as Minikube. If you do want to specify resources, uncomment the following
-# lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-# limits:
-#   cpu: 100m
-#   memory: 128Mi
-# requests:
-#   cpu: 100m
-#   memory: 128Mi
+# Ingress settings
+# ingress:
+#   # Enable ingress for home assistant
+#   enabled: false
+#   className: ""
+#   annotations:
+#     {}
+#     # kubernetes.io/ingress.class: nginx
+#     # kubernetes.io/tls-acme: "true"
+#   hosts:
+#     - host: chart-example.local
+#       paths:
+#         - path: /
+#           pathType: ImplementationSpecific
+#   tls:
+#   - secretName: "ha-secret"
+#      hosts:
+#        - chart-example.local
 
-nodeSelector: {}
+# Resource settings for the container
+resources:
+  {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
 
+# Node selector settings for scheduling the pod on specific nodes
+nodeSelector: 
+
+
+
+# Tolerations settings for scheduling the pod based on node taints
 tolerations: []
 
+# Affinity settings for controlling pod scheduling
 affinity: {}
 
+# Persistence values for the Home Assistant instance
 persistence:
-  storageClass: ""
-  existingClaim: ""
+  # Enable or disable persistence
   enabled: true
+  # Access mode for the persistent volume claim
   accessMode: ReadWriteOnce
+  # Size of the persistent volume claim
   size: 5Gi
-  # if you need any additional volumes, you can define them here
-  additionalVolumes: []
-  # if you need any additional volume mounts, you can define them here
-  additionalMounts: []
+  # Storage class for the persistent volume claim
+  storageClass: "cstor-csi-disk"
 
-deploymentStrategy:
-  type: Recreate
+# if you need any additional volumes, you can define them here
+additionalVolumes: []
+  # - hostPath:
+  #     path: >-
+  #       /dev/serial/by-id/usb-Silicon_Labs_Sonoff_Zigbee_3.0_USB_Dongle_Plus_0001-if00-port0
+  #     type: CharDevice
+  #   name: usb
+# if you need any additional volume mounts, you can define them here
+additionalMounts: []
+  # - mountPath: /dev/ttyACM0
+  #   name: usb
+
+# Addons configuration for additional services
+addons:
+  # Code-server addon configuration
+  codeserver:
+    # Enable or disable the code-server addon
+    enabled: true
+    # Resource settings for the code-server container
+    resources: {}
+    # Image settings for the code-server addon
+    image:
+      # Repository for the code-server image
+      repository: ghcr.io/coder/code-server
+      # Image pull policy for the code-server image
+      pullPolicy: IfNotPresent
+      # Tag for the code-server image
+      tag: "4.21.0"
+    # Service settings
+    service:
+      # Service type (ClusterIP, NodePort, LoadBalancer, or ExternalName)
+      type: ClusterIP
+      # Service port
+      port: 12321
+    # Ingress settings for the code-server addon
+    ingress:
+      # Enable or disable the ingress for the code-server addon
+      enabled: false
+      # Ingress class name
+      className: ""
+      # Ingress annotations
+      annotations: {}
+      # Ingress hosts configuration
+      hosts:
+        - host: chart-example.local
+          paths:
+            - path: /
+              pathType: ImplementationSpecific
+      # Ingress TLS configuration
+      tls: []

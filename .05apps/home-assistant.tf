@@ -14,27 +14,11 @@ resource "null_resource" "kubeconfig_home_assistant" {
 resource "helm_release" "home_assistant" {
   name       = "home-assistant"
   namespace  = "home-assistant"
-  repository = "http://pajikos.github.io/home-assistant-helm-chart/"
+  repository = "http://pajikos.github.io/home-assistant-helm-chart"
   chart      = "home-assistant"
   version    = var.version_home_assistant
 
-  set {
-    name = "nodeSelector.kubernetes\\.io/hostname"
-    value = "cntrlpln-13-blue"
-  }
-  set {
-    name = "persistence.enabled"
-    value = false
-  }
-  # set {
-  #   name = "persistence.storageClass"
-  #   value = var.storage_class_name
-  # }
-  # set {
-  #   name = "persistence.existingClaim"
-  #   value = kubernetes_persistent_volume_claim.ha_pvc.metadata[0].name
-  # }
-  #values     = [file("services/home-assistant/values.yaml")]
+  values     = [file("services/home-assistant/values.yaml")]
   depends_on = [kubernetes_namespace.home_assistant_namespace, null_resource.kubeconfig_home_assistant]
 }
 
@@ -72,22 +56,22 @@ resource "kubernetes_ingress_v1" "ha_ingress" {
   }
 }
 
-resource "kubernetes_persistent_volume_claim" "ha_pvc" {
-  metadata {
-    name      = "home-assistant-pvc"
-    namespace = kubernetes_namespace.home_assistant_namespace.metadata[0].name
-  }
+# resource "kubernetes_persistent_volume_claim" "ha_pvc" {
+#   metadata {
+#     name      = "home-assistant-pvc"
+#     namespace = kubernetes_namespace.home_assistant_namespace.metadata[0].name
+#   }
 
-  spec {
-    storage_class_name = var.storage_class_name
-    access_modes = ["ReadWriteOnce"]
-    resources {
-      requests = {
-        storage = "5Gi"
-      }
-    }
-  }
-  # lifecycle {
-  #   prevent_destroy = true
-  # }
-}
+#   spec {
+#     storage_class_name = var.storage_class_name
+#     access_modes = ["ReadWriteOnce"]
+#     resources {
+#       requests = {
+#         storage = "5Gi"
+#       }
+#     }
+#   }
+#   # lifecycle {
+#   #   prevent_destroy = true
+#   # }
+# }

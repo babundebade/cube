@@ -33,6 +33,6 @@ variable "version_pihole" {
 ### 05 - Apps
 variable "version_home_assistant" {
   type        = string
-  default     = "0.2.33"   #08.02.2024
+  default     = "0.2.34"   #12.02.2024
   description = "version of home-assistant"
 }
