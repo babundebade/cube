@@ -1,5 +1,5 @@
 ---
-- name: Verify and Install iSCSI Services
+- name: Verify and Ensure iSCSI Services are Properly Configured
   hosts: all
   become: yes
 
@@ -9,34 +9,67 @@
         path: /etc/iscsi/initiatorname.iscsi
       register: initiator
 
-    - name: Check iSCSI service status
-      ansible.builtin.service:
-        name: iscsid
-        state: started
-      register: service_status
-      when: initiator.stat.exists
-
-    - name: Enable and start iscsid service if not running
-      ansible.builtin.systemd:
-        name: iscsid
-        enabled: yes
-        state: started
-      when: service_status.status is defined and service_status.status != "running"
-
     - name: Install iSCSI tools if not installed
       when: not initiator.stat.exists
       block:
         - name: Update apt package index
           ansible.builtin.apt:
             update_cache: yes
+            cache_valid_time: 3600 # Prevents repeated cache updates if recently done
 
         - name: Install open-iscsi package
           ansible.builtin.apt:
             name: open-iscsi
             state: latest
 
-        - name: Enable and start iscsid service
-          ansible.builtin.systemd:
-            name: iscsid
-            enabled: yes
-            state: started
+    - name: Install necessary kernel modules for iSCSI
+      ansible.builtin.apt:
+        name: "linux-modules-extra-{{ ansible_kernel }}"
+        state: present
+      register: kernel_modules_installed
+
+    - name: Ensure iscsid service is enabled and started
+      ansible.builtin.systemd:
+        name: iscsid
+        enabled: yes
+        state: started
+
+    - name: Check if iscsi_tcp kernel module is loaded
+      ansible.builtin.shell: lsmod | grep iscsi_tcp
+      register: iscsi_tcp_loaded
+      ignore_errors: true
+      changed_when: false
+
+    - name: Load iscsi_tcp kernel module if not loaded
+      ansible.builtin.modprobe:
+        name: iscsi_tcp
+        state: present
+      when: iscsi_tcp_loaded.stdout == ""
+
+    - name: Verify iscsid service is running
+      ansible.builtin.service:
+        name: iscsid
+        state: started
+      register: iscsid_service
+
+    - name: Restart iscsid service if necessary
+      ansible.builtin.systemd:
+        name: iscsid
+        state: restarted
+        enabled: yes
+      when: iscsid_service.state == "stopped" or iscsid_service.state == "failed"
+
+    - name: Remove obsolete linux-modules-extra packages
+      block:
+        - name: Find obsolete linux-modules-extra packages
+          ansible.builtin.shell: dpkg -l | grep linux-modules-extra | grep -v "{{ ansible_kernel }}" | awk '{print $2}'
+          register: obsolete_packages
+          changed_when: false
+          failed_when: false
+
+        - name: Remove obsolete linux-modules-extra packages
+          ansible.builtin.apt:
+            name: "{{ item }}"
+            state: absent
+          loop: "{{ obsolete_packages.stdout_lines }}"
+          when: obsolete_packages.stdout != ""
