@@ -11,17 +11,17 @@
         path: "{{ base_remote_dir }}"
         state: directory
         owner: dario
-        group: sudo  # Use 'sudo' group for Ubuntu
-        mode: '2775'  # Sets sticky bit to preserve group ownership on new files, and allows read-write-execute for owner and group
+        group: sudo
+        mode: '2775'
 
-- name: Synchronize .tfstate and .tfvars files within ~/cube directory to control plane nodes
+- name: Synchronize .tfstate and .tfvars files within ~/cube directory in both directions
   hosts: controlplanes
   gather_facts: no
   vars:
     local_source_dir: "~/cube"
-    base_remote_dir: "~/cube"  # Ensure variable is also defined here for consistency
+    base_remote_dir: "~/cube"
   tasks:
-    - name: Find .tfstate and .tfvars files in the source directory
+    - name: Find .tfstate and .tfvars files in the local source directory
       find:
         paths: "{{ local_source_dir }}"
         patterns: "*.tfstate,*.tfvars"
@@ -35,21 +35,34 @@
         state: directory
         mode: '2775'
         owner: dario
-        group: sudo  # Use 'sudo' group for Ubuntu
+        group: sudo
       loop: "{{ found_files.files }}"
       become: true
       when: found_files.matched > 0
 
-    - name: Synchronize the newest .tfstate and .tfvars files to the remote hosts, maintaining the directory structure
+    - name: Synchronize the newest .tfstate and .tfvars files to the remote hosts
       synchronize:
         src: "{{ item.path }}"
         dest: "{{ item.path | regex_replace('^' + local_source_dir, base_remote_dir) }}"
         mode: push
         rsync_opts:
-          - "--update"  # Ensures only newer files are transferred
-          - "--times"   # Preserves modification times
-          - "--chown=dario:sudo"  # Ensures files and directories are owned by dario and sudo group
-          - "--chmod=2775"  # Sets permissions to allow group writes and preserve group ownership
+          - "--update"
+          - "--times"
+          - "--chown=dario:sudo"
+          - "--chmod=2775"
       loop: "{{ found_files.files }}"
       when: found_files.matched > 0
       delegate_to: localhost
+
+    - name: Synchronize the newest .tfstate and .tfvars files from the remote hosts to the local directory
+      synchronize:
+        src: "{{ base_remote_dir }}/"
+        dest: "{{ local_source_dir }}/"
+        mode: pull
+        rsync_opts:
+          - "--update"
+          - "--times"
+          - "--chown=dario:sudo"
+          - "--chmod=2775"
+      delegate_to: localhost
+      become: false
