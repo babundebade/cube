@@ -153,8 +153,7 @@ resource "kubernetes_ingress_v1" "pihole_ingress" {
     name      = "pihole-ingress"
     namespace = kubernetes_namespace.pihole_namespace.metadata[0].name
     annotations = {
-      "cert-manager.io/cluster-issuer" = var.cert_issuer_name
-      #"nginx.ingress.kubernetes.io/backend-protocol" = "HTTPS"
+      "cert-manager.io/cluster-issuer"    = var.cert_issuer_name
     }
   }
 
@@ -168,28 +167,13 @@ resource "kubernetes_ingress_v1" "pihole_ingress" {
       host = var.tld_domain
       http {
         path {
-          path     = "/admin"
+          path = "/admin"
+          path_type = "Prefix"
           backend {
             service {
               name = "pihole-web"
               port {
                 number = 80
-              }
-            }
-          }
-        }
-      }
-    }
-    rule {
-      host = var.tld_domain
-      http {
-        path {
-          path     = "/admin"
-          backend {
-            service {
-              name = "pihole-web"
-              port {
-                number = 443
               }
             }
           }
