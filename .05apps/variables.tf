@@ -37,7 +37,7 @@ variable "tld_domain" {
 }
 
 # Cert-manager variables
-variable "namespace_cert_manager" {
+variable "namespacecertmanager" {
   type        = string
   default     = "cert-manager"
   description = "namespace for cert-manager"
@@ -96,3 +96,9 @@ variable "storage_class_name" {
   description = "name of standard storage class"
 }
 
+variable "cloudflareToken" {
+  type        = string
+  default     = ""
+  description = "Cloudflare API Token"
+  sensitive   = true
+}
