@@ -34,7 +34,7 @@ resource "kubernetes_ingress_v1" "ha_ingress" {
   spec {
     ingress_class_name = "nginx"
     tls {
-      hosts = ["ha.darioludwig.space", "192.168.1.131"]
+      hosts = ["ha.darioludwig.space"]
       secret_name = "ha-secret"
     }
     rule {
