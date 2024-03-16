@@ -87,7 +87,7 @@ securityContext:
 # Service settings
 service:
   # Service type (ClusterIP, NodePort, LoadBalancer, or ExternalName)
-  type: ClusterIP
+  type: LoadBalancer
   # Service port
   port: 8080
 
@@ -138,7 +138,7 @@ affinity: {}
 # Persistence values for the Home Assistant instance
 persistence:
   # Enable or disable persistence
-  enabled: true
+  enabled: false
   # Access mode for the persistent volume claim
   accessMode: ReadWriteOnce
   # Size of the persistent volume claim
@@ -163,7 +163,7 @@ addons:
   # Code-server addon configuration
   codeserver:
     # Enable or disable the code-server addon
-    enabled: true
+    enabled: false
     # Resource settings for the code-server container
     resources: {}
     # Image settings for the code-server addon

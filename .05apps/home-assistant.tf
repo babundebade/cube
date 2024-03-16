@@ -22,39 +22,39 @@ resource "helm_release" "home_assistant" {
   depends_on = [kubernetes_namespace.home_assistant_namespace, null_resource.kubeconfig_home_assistant]
 }
 
-resource "kubernetes_ingress_v1" "ha_ingress" {
-  metadata {
-    name      = "home-assistant-ingress"
-    namespace = kubernetes_namespace.home_assistant_namespace.metadata[0].name
-    annotations = {
-      "cert-manager.io/cluster-issuer" = var.cert_issuer_name
-    }
-  }
+# resource "kubernetes_ingress_v1" "ha_ingress" {
+#   metadata {
+#     name      = "home-assistant-ingress"
+#     namespace = kubernetes_namespace.home_assistant_namespace.metadata[0].name
+#     annotations = {
+#       "cert-manager.io/cluster-issuer" = var.cert_issuer_name
+#     }
+#   }
 
-  spec {
-    ingress_class_name = "nginx"
-    tls {
-      hosts = ["ha.darioludwig.space"]
-      secret_name = "ha-secret"
-    }
-    rule {
-      host = "ha.darioludwig.space"
-      http {
-        path {
-          path = "/"
-          backend {
-            service {
-              name = "home-assistant"
-              port {
-                number = 8123
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
+#   spec {
+#     ingress_class_name = "nginx"
+#     tls {
+#       hosts = ["ha.darioludwig.space"]
+#       secret_name = "ha-secret"
+#     }
+#     rule {
+#       host = "ha.darioludwig.space"
+#       http {
+#         path {
+#           path = "/"
+#           backend {
+#             service {
+#               name = "home-assistant"
+#               port {
+#                 number = 8123
+#               }
+#             }
+#           }
+#         }
+#       }
+#     }
+#   }
+# }
 
 # resource "kubernetes_persistent_volume_claim" "ha_pvc" {
 #   metadata {
