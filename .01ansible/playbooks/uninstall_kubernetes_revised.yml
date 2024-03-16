@@ -1,0 +1,125 @@
+---
+- name: Force Uninstall Kubernetes from Worker Nodes
+  hosts: workers
+  become: yes
+
+  tasks:
+    - name: Stop kubelet service
+      systemd:
+        name: kubelet
+        state: stopped
+        enabled: no
+      ignore_errors: yes
+
+    - name: Stop docker service
+      systemd:
+        name: docker
+        state: stopped
+        enabled: no
+      ignore_errors: yes
+
+    - name: Stop containerd service
+      systemd:
+        name: containerd
+        state: stopped
+        enabled: no
+      ignore_errors: yes
+
+    - name: Run kubeadm reset
+      command: kubeadm reset -f
+      ignore_errors: yes
+
+    - name: Flush iptables
+      command: "{{ item }}"
+      loop:
+        - iptables -F
+        - iptables -X
+      ignore_errors: yes
+
+    - name: Uninstall Kubernetes packages
+      apt:
+        name: "{{ item }}"
+        state: absent
+        purge: yes
+        force: yes
+      loop:
+        - kubeadm
+        - kubelet
+        - kubectl
+      ignore_errors: yes
+
+    - name: Remove Kubernetes directories
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /etc/kubernetes/
+        - /var/lib/etcd/
+        - /var/lib/kubelet/
+        - /var/lib/dockershim/
+        - /var/run/kubernetes/
+        - /var/lib/cni/
+      ignore_errors: yes
+
+- name: Force Uninstall Kubernetes from Control Plane Nodes
+  hosts: controlplanes
+  become: yes
+  serial: 1  # Ensures the playbook runs on one node at a time
+
+  tasks:
+    - name: Stop kubelet service
+      systemd:
+        name: kubelet
+        state: stopped
+        enabled: no
+      ignore_errors: yes
+
+    - name: Stop docker service
+      systemd:
+        name: docker
+        state: stopped
+        enabled: no
+      ignore_errors: yes
+
+    - name: Stop containerd service
+      systemd:
+        name: containerd
+        state: stopped
+        enabled: no
+      ignore_errors: yes
+
+    - name: Run kubeadm reset
+      command: kubeadm reset -f
+      ignore_errors: yes
+
+    - name: Flush iptables
+      command: "{{ item }}"
+      loop:
+        - iptables -F
+        - iptables -X
+      ignore_errors: yes
+
+    - name: Uninstall Kubernetes packages
+      apt:
+        name: "{{ item }}"
+        state: absent
+        purge: yes
+        force: yes
+      loop:
+        - kubeadm
+        - kubelet
+        - kubectl
+      ignore_errors: yes
+
+    - name: Remove Kubernetes directories
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /etc/kubernetes/
+        - /var/lib/etcd/
+        - /var/lib/kubelet/
+        - /var/lib/dockershim/
+        - /var/run/kubernetes/
+        - /var/lib/cni/
+      ignore_errors: yes
