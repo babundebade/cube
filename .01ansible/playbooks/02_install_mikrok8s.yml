@@ -1,0 +1,79 @@
+---
+- name: Install MicroK8s on all nodes
+  hosts: all
+  become: yes
+  tasks:
+    - name: Gather the package facts
+      ansible.builtin.package_facts:
+        manager: auto
+
+    - name: Load necessary kernel modules
+      modprobe:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - br_netfilter
+        - overlay
+
+    - name: Update apt package index
+      apt:
+        update_cache: yes
+
+    - name: Install snapd
+      apt:
+        name: snapd
+        state: present
+      when: "'snapd' not in ansible_facts.packages"
+
+    - name: Ensure snap’s core is up-to-date
+      command: snap install core
+      ignore_errors: yes
+
+    - name: Check if MicroK8s is installed
+      command: snap list microk8s
+      register: microk8s_installed
+      failed_when: false
+      changed_when: false
+
+    - name: Install MicroK8s
+      command: snap install microk8s --classic
+      when: microk8s_installed.rc != 0
+
+    - name: Ensure current user is in the microk8s group
+      user:
+        name: "{{ ansible_user }}"
+        groups: microk8s
+        append: yes
+
+    - name: Wait for MicroK8s to be ready
+      shell: microk8s status --wait-ready
+      args:
+        executable: /bin/bash
+
+- name: Initialize MicroK8s cluster
+  hosts: controlplanes
+  become: yes
+  tasks:
+    - name: Enable common services
+      command: microk8s enable dns dashboard storage
+
+    - name: Generate the join command (Manual Construction)
+      command: microk8s add-node --token-ttl 600
+      register: add_node_output
+      failed_when: false
+      changed_when: true
+
+    - name: Extract token and ip-port
+      set_fact:
+        join_command_details: "{{ add_node_output.stdout_lines | select('search', 'microk8s join') | first }}"
+
+    - debug:
+        var: join_command_details
+
+- name: Join MicroK8s Workers
+  hosts: workers
+  become: yes
+  tasks:
+    - name: Construct and execute join command on worker nodes
+      shell: "{{ hostvars[groups['controlplanes'][0]].join_command_details }}"
+      when: inventory_hostname not in groups['controlplanes']

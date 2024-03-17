@@ -1,0 +1,62 @@
+---
+- name: Force Uninstall MicroK8s from all nodes
+  hosts: all
+  become: yes
+
+  tasks:
+    - name: Stop MicroK8s
+      command: microk8s stop
+      ignore_errors: yes
+
+    - name: Remove MicroK8s snap
+      command: snap remove microk8s --purge
+      ignore_errors: yes
+
+    - name: Remove any lingering MicroK8s directories
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /var/snap/microk8s
+        - /var/lib/kubelet  # MicroK8s uses this directory as well
+        - /var/log/containers
+        - /var/log/pods
+        - /var/log/snap.microk8s
+      ignore_errors: yes
+
+    - name: Flush iptables
+      command: "{{ item }}"
+      loop:
+        - iptables -F
+        - iptables -X
+      ignore_errors: yes
+
+    - name: Remove Docker if installed (Optional)
+      apt:
+        name: docker.io
+        state: absent
+        purge: yes
+        force: yes
+      ignore_errors: yes
+
+    - name: Remove additional packages (Optional)
+      apt:
+        name: "{{ item }}"
+        state: absent
+        purge: yes
+        force: yes
+      loop:
+        - snapd
+        - lxd
+        - containerd
+      ignore_errors: yes
+
+    - name: Clean up any remaining Docker directories (Optional)
+      file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /var/lib/docker
+        - /etc/docker
+        - /var/run/docker.sock
+      ignore_errors: yes
