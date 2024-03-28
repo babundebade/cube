@@ -21,7 +21,7 @@
       ansible.builtin.shell: |
         sysctl vm.nr_hugepages={{ hugepages }}
         echo 'vm.nr_hugepages={{ hugepages }}' | tee -a /etc/sysctl.conf
-      when: hugepages_check.stdout.find('{{ hugepages }}') == -1
+      when: '"vm.nr_hugepages = {{ hugepages }}" not in hugepages_check.stdout'
 
     - name: Install linux-modules-extra package
       ansible.builtin.apt:
@@ -49,8 +49,7 @@
     - name: Enable MetalLB with specific IP range
       ansible.builtin.command: |
         bash -c "echo '{{ metallb_ip_range }}' | microk8s enable metallb"
-      register: metallb
-      changed_when: "'is already enabled' not in metallb.stderr"
+      when: inventory_hostname == '192.168.1.10'
 
     - name: Display MicroK8s addon output
       ansible.builtin.debug:
