@@ -1,0 +1,17 @@
+- name: Enable MicroK8s Addons (MetalLB, Ingress, Cert-Manager)
+  hosts: all
+  become: yes
+  gather_facts: no
+
+  tasks:
+    - name: Enable MetalLB MicroK8s addon
+      ansible.builtin.shell: microk8s enable metallb
+      when: "'controlplanes' in group_names"
+
+    - name: Enable Ingress MicroK8s addon
+      ansible.builtin.shell: microk8s enable ingress
+      when: "'controlplanes' in group_names"
+
+    - name: Enable Cert-Manager MicroK8s addon
+      ansible.builtin.shell: microk8s enable cert-manager
+      when: "'controlplanes' in group_names"
