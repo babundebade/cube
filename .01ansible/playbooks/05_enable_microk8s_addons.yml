@@ -1,17 +1,60 @@
-- name: Enable MicroK8s Addons (MetalLB, Ingress, Cert-Manager)
+- name: Prepare environment and enable MicroK8s addons
   hosts: all
-  become: yes
-  gather_facts: no
-
+  become: true
+  vars:
+    hugepages: 1024
+    metallb_ip_range: "192.168.1.129-192.168.1.135"
+    microk8s_addons:
+      - dns
+      - helm3
+      - ingress
+      - cert-manager
+      - mayastor
   tasks:
-    - name: Enable MetalLB MicroK8s addon
-      ansible.builtin.shell: microk8s enable metallb
-      when: "'controlplanes' in group_names"
+    - name: Check if HugePages is already set
+      ansible.builtin.command: sysctl vm.nr_hugepages
+      register: hugepages_check
+      changed_when: false
+      failed_when: false
 
-    - name: Enable Ingress MicroK8s addon
-      ansible.builtin.shell: microk8s enable ingress
-      when: "'controlplanes' in group_names"
+    - name: Enable HugePages
+      ansible.builtin.shell: |
+        sysctl vm.nr_hugepages={{ hugepages }}
+        echo 'vm.nr_hugepages={{ hugepages }}' | tee -a /etc/sysctl.conf
+      when: hugepages_check.stdout.find('{{ hugepages }}') == -1
 
-    - name: Enable Cert-Manager MicroK8s addon
-      ansible.builtin.shell: microk8s enable cert-manager
-      when: "'controlplanes' in group_names"
+    - name: Install linux-modules-extra package
+      ansible.builtin.apt:
+        name: linux-modules-extra-{{ ansible_kernel }}
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Load nvme_tcp module
+      ansible.builtin.modprobe:
+        name: nvme_tcp
+        state: present
+
+    - name: Persist nvme_tcp module
+      ansible.builtin.lineinfile:
+        path: /etc/modules-load.d/microk8s-mayastor.conf
+        line: nvme-tcp
+        create: yes
+
+    - name: Enable MicroK8s addons
+      ansible.builtin.command: microk8s enable {{ item }}
+      register: addon_output
+      changed_when: "'is already enabled' not in addon_output.stderr"
+      loop: "{{ microk8s_addons }}"
+
+    - name: Enable MetalLB with specific IP range
+      ansible.builtin.command: |
+        bash -c "echo '{{ metallb_ip_range }}' | microk8s enable metallb"
+      register: metallb
+      changed_when: "'is already enabled' not in metallb.stderr"
+
+    - name: Display MicroK8s addon output
+      ansible.builtin.debug:
+        var: item.stdout_lines
+      loop: "{{ microk8s_addons | map('extract', hostvars[inventory_hostname]) | list }}"
+      loop_control:
+        loop_var: addon_output
