@@ -1,4 +1,16 @@
 ---
+- name: Verify MicroK8s Installation and Version
+  hosts: all
+  become: yes
+  gather_facts: no
+  tasks:
+    - name: Check MicroK8s status
+      ansible.builtin.command: microk8s status --wait-ready
+      register: microk8s_status
+      failed_when: microk8s_status.rc != 0
+      changed_when: false
+      ignore_errors: true
+
 - name: Prepare and Configure Nodes for MicroK8s with Mayastor
   hosts: all
   become: yes
@@ -6,11 +18,11 @@
 
   tasks:
     - name: Update apt package index
-      apt:
+      ansible.builtin.apt:
         update_cache: yes
 
     - name: Install necessary packages
-      apt:
+      ansible.builtin.apt:
         name:
           - apt-transport-https
           - ca-certificates
@@ -21,37 +33,14 @@
           - util-linux
         state: present
 
-    - name: Ensure snap’s core is up-to-date
-      ansible.builtin.command:
-        cmd: snap install core
-      ignore_errors: yes
-
-    - name: Install MicroK8s
-      ansible.builtin.command:
-        cmd: snap install microk8s --classic --channel=1.27/stable
-      ignore_errors: yes
-
-    - name: Add the current user to the microk8s group
-      ansible.builtin.user:
-        name: "{{ ansible_user }}"
-        groups: microk8s
-        append: yes
-
     - name: Enable and configure HugePages
-      block:
-        - name: Enable HugePages
-          ansible.builtin.sysctl:
-            name: vm.nr_hugepages
-            value: '1024'
-            state: present
-            reload: yes
-        - name: Persist HugePages configuration
-          ansible.builtin.lineinfile:
-            path: /etc/sysctl.conf
-            line: 'vm.nr_hugepages=1024'
-            create: yes
+      ansible.builtin.sysctl:
+        name: vm.nr_hugepages
+        value: '1024'
+        state: present
+        reload: yes
 
-    - name: Install and load required kernel modules
+    - name: Install and load required kernel modules for Mayastor
       block:
         - name: Install nvme_tcp module support
           ansible.builtin.apt:
@@ -64,21 +53,33 @@
         - name: Ensure nvme_tcp module loads on boot
           ansible.builtin.lineinfile:
             path: /etc/modules-load.d/microk8s-mayastor.conf
-            line: 'nvme-tcp'
+            line: 'nvme_tcp'
             create: yes
 
-    - name: Restart MicroK8s to apply changes
-      ansible.builtin.shell: microk8s stop && microk8s start
-      ignore_errors: yes
+    - name: Reboot Hosts to Apply Kernel and HugePages Changes
+      ansible.builtin.reboot:
+        msg: "Reboot initiated by Ansible for Mayastor prerequisites"
+        connect_timeout: 5
+        reboot_timeout: 600
+        pre_reboot_delay: 0
+        post_reboot_delay: 30
+        test_command: uptime
+
+    - name: Wait for the host to become reachable again
+      wait_for_connection:
+        delay: 5
+        timeout: 300
 
     - name: Enable DNS and Helm addons
       ansible.builtin.shell: microk8s enable dns helm3
+      when: "'controlplanes' in group_names"
 
     - name: Enable Mayastor addon
       ansible.builtin.shell: microk8s enable core/mayastor --default-pool-size 20G
+      when: "'controlplanes' in group_names"
 
 - name: Dynamically Create Mayastor Pools on Nodes with Suitable SSDs
-  hosts: all
+  hosts: workers
   become: yes
   gather_facts: no
 
@@ -90,14 +91,14 @@
 
     - name: Set fact for disks larger than 900GB without a mountpoint
       set_fact:
-        large_disks: "{{ lsblk_output.stdout | from_json | json_query('blockdevices[?size>`900*1024*1024*1024` && mountpoint==``].name') }}"
+        large_disks: "{{ lsblk_output.stdout | from_json | json_query('blockdevices[?size>`900000000000` && mountpoint==``].name') }}"
 
     - name: Debug large disks
       ansible.builtin.debug:
         msg: "Large disks found: {{ large_disks }}"
 
     - name: Create Mayastor pools on identified disks
-      ansible.builtin.shell: "microk8s mayastor-pools add --node {{ ansible_hostname }} --device /dev/{{ item }}"
+      ansible.builtin.shell: "microk8s mayastor-pool create {{ ansible_hostname }} /dev/{{ item }}"
       loop: "{{ large_disks }}"
       when: large_disks is defined and large_disks | length > 0
       ignore_errors: true
