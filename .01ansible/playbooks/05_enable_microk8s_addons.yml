@@ -1,3 +1,4 @@
+---
 - name: Prepare environment and enable MicroK8s addons
   hosts: all
   become: true
@@ -20,8 +21,8 @@
     - name: Enable HugePages
       ansible.builtin.shell: |
         sysctl vm.nr_hugepages={{ hugepages }}
-        echo 'vm.nr_hugepages={{ hugepages }}' | tee -a /etc/sysctl.conf
-      when: '"vm.nr_hugepages = {{ hugepages }}" not in hugepages_check.stdout'
+        echo 'vm.nr_hugepages={{ hugepages }}' >> /etc/sysctl.conf
+      when: "'vm.nr_hugepages = ' ~ hugepages not in hugepages_check.stdout"
 
     - name: Install linux-modules-extra package
       ansible.builtin.apt:
@@ -37,7 +38,7 @@
     - name: Persist nvme_tcp module
       ansible.builtin.lineinfile:
         path: /etc/modules-load.d/microk8s-mayastor.conf
-        line: nvme-tcp
+        line: nvme_tcp
         create: yes
 
     - name: Enable MicroK8s addons
@@ -45,15 +46,17 @@
       register: addon_output
       changed_when: "'is already enabled' not in addon_output.stderr"
       loop: "{{ microk8s_addons }}"
+      ignore_errors: true
 
     - name: Enable MetalLB with specific IP range
       ansible.builtin.command: |
         bash -c "echo '{{ metallb_ip_range }}' | microk8s enable metallb"
-      when: inventory_hostname == '192.168.1.10'
+      when: inventory_hostname == groups['controlplanes'][0]
 
     - name: Display MicroK8s addon output
       ansible.builtin.debug:
-        var: item.stdout_lines
-      loop: "{{ microk8s_addons | map('extract', hostvars[inventory_hostname]) | list }}"
+        var: addon_output.stdout_lines
+      loop: "{{ microk8s_addons }}"
       loop_control:
-        loop_var: addon_output
+        label: "{{ addon_output.item }}"
+        extended: yes

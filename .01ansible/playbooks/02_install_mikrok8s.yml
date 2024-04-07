@@ -14,23 +14,25 @@
       loop:
         - br_netfilter
         - overlay
-      # Removed the notify for rebooting the system as it's unnecessary
 
     - name: Update apt package index
       ansible.builtin.apt:
         update_cache: yes
-      # Idempotency maintained by apt module
 
     - name: Install snapd
       ansible.builtin.apt:
         name: snapd
         state: present
-      # Using ansible_facts.packages ensures idempotency by checking if snapd is already installed.
+
+    - name: Check snap core status
+      ansible.builtin.command: snap list core
+      register: snap_core_status
+      failed_when: false
+      changed_when: false
 
     - name: Ensure snap’s core is up-to-date
       ansible.builtin.command: snap install core --classic
-      ignore_errors: yes
-      # Consider handling errors more gracefully or ensuring idempotency by checking snap core status first.
+      when: snap_core_status.rc != 0
 
     - name: Check if MicroK8s is installed
       ansible.builtin.command: snap list microk8s
@@ -52,7 +54,6 @@
       ansible.builtin.shell: microk8s status --wait-ready
       args:
         executable: /bin/bash
-      # Ensures MicroK8s is fully operational before proceeding.
 
 - name: Initialize MicroK8s cluster
   hosts: controlplanes
@@ -60,27 +61,31 @@
   tasks:
     - name: Enable common services
       ansible.builtin.shell: microk8s enable dns dashboard storage
-      # Shell used for commands not directly supported by Ansible modules
 
     - name: Generate the join command (Manual Construction)
       ansible.builtin.command: microk8s add-node --token-ttl 600
       register: add_node_output
       changed_when: true
-      # Assuming change is made when command runs, ensuring idempotency might require additional logic.
 
     - name: Extract token and ip-port
       ansible.builtin.set_fact:
         join_command_details: "{{ add_node_output.stdout_lines | select('search', 'microk8s join') | first }}"
 
-    - debug:
-        var: join_command_details
-      # Good for troubleshooting but consider if it's needed in production code.
-
 - name: Join MicroK8s Workers
   hosts: workers
   become: yes
   tasks:
-    - name: Construct and execute join command on worker nodes
+    - name: Attempt to join the MicroK8s cluster
       ansible.builtin.shell: "{{ hostvars[groups['controlplanes'][0]].join_command_details }}"
-      when: inventory_hostname not in groups['controlplanes']
-      # Executes join command only on workers, excluding control planes.
+      register: join_attempt
+      ignore_errors: true
+
+    - name: Check join attempt outcome
+      ansible.builtin.debug:
+        msg: "Join attempt outcome: {{ join_attempt.stdout }}"
+      when: join_attempt.rc != 0
+
+    - name: Acknowledge if node is already part of the cluster
+      ansible.builtin.debug:
+        msg: "Node is already part of the cluster or another error occurred."
+      when: "'already known to dqlite' in join_attempt.stdout or join_attempt.rc != 0"
